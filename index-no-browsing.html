@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalProGo - Home Services Platform Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Visualization & Content Choices:
+        - Report Info: Homepage vision (Homepage_TechRequirements_v1 Sec 1 & 2). Goal: Demonstrate Expedia-like entry. Viz/Presentation: Hero with Zip Code input, static "How it Works", "Categories", "Why Us" sections. Interaction: Zip Code input + button click transitions to Explore Services view. Justification: Core UX differentiator. Library/Method: Vanilla JS for view switching.
+        - Report Info: Anonymous service browsing & pricing (LawnGenius_TechRequirements_v1 REQ-CUST-001-005) on Explore Services page. Goal: Show transparent price discovery. Viz/Presentation: Interactive dropdowns (service type, yard size), dynamic text (description, price range). Interaction: User selections update info. Justification: Core UX of platform. Library/Method: Vanilla JS.
+        - Report Info: Simulated booking (LawnGenius_TechRequirements_v1 REQ-CUST-006-012) on Explore Services page. Goal: Show PII collection point. Viz/Presentation: Mock form fields. Interaction: Button click reveals form. Justification: Illustrates user flow. Library/Method: Vanilla JS.
+        - Report Info: Platform components overview, Tech/Future (LawnGenius_TechRequirements_v1 Sec 1.2, 1.3, 7, 8) on Explore Services page. Goal: Provide context. Viz/Presentation: Static cards/lists. Justification: Completes platform overview. Library/Method: HTML/Tailwind.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Lighter neutral background */
+            color: #343a40; 
+        }
+        .accent-green { color: #28a745; }
+        .accent-green-bg { background-color: #28a745; }
+        .accent-green-bg-hover:hover { background-color: #218838; }
+        .accent-blue { color: #007bff; }
+        .accent-blue-bg { background-color: #007bff; }
+        .accent-blue-bg-hover:hover { background-color: #0056b3; }
+        
+        .section {
+            padding: 48px 24px; /* Consistent padding */
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.07);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .button {
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-align: center;
+        }
+        .button:active {
+            transform: scale(0.97);
+        }
+
+        .button-primary {
+            background-color: #28a745; /* Green accent */
+            color: white;
+        }
+        .button-primary:hover {
+            background-color: #218838;
+        }
+        .button-secondary {
+            background-color: #007bff; /* Blue accent */
+            color: white;
+        }
+        .button-secondary:hover {
+            background-color: #0056b3;
+        }
+        
+        select, input[type="text"], input[type="email"], input[type="tel"], input[type="search"] {
+            border: 1px solid #ced4da; 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            width: 100%;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-size: 1rem;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25);
+        }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.5s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-bg {
+             background: linear-gradient(135deg, #e0f2f7 0%, #d1e7dd 100%); /* Gradient background */
+        }
+        header nav a.active-nav {
+            color: #28a745;
+            font-weight: 600;
+            border-bottom: 2px solid #28a745;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="text-3xl font-bold accent-green site-title">LocalProGo</a>
+            <nav class="space-x-2">
+                <a href="#home" class="nav-link text-gray-700 hover:accent-green px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                <a href="#exploreServices" class="nav-link text-gray-700 hover:accent-green px-3 py-2 rounded-md text-sm font-medium">Explore Services</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div id="homeView" class="view active">
+            <section class="hero-bg py-24 md:py-36">
+                <div class="container mx-auto px-6 text-center">
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-800 mb-6 leading-tight">
+                        Find Trusted Local Pros, <span class="accent-green">Fast</span>.
+                    </h1>
+                    <p class="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
+                        Easily browse, compare, and book top-rated local professionals for lawn care, landscaping, and more with LocalProGo. Just enter your Zip Code to begin.
+                    </p>
+                    <form id="zipCodeForm" class="max-w-xl mx-auto flex flex-row gap-3 items-center">
+                        <label for="zipCodeInput" class="sr-only">Enter Your Zip Code</label>
+                        <input type="search" id="zipCodeInput" placeholder="Enter Your Zip Code (e.g., 75201)" class="flex-grow text-lg p-4 rounded-lg shadow-sm" required pattern="\d{5}" title="Enter a 5-digit Zip Code">
+                        <button type="submit" class="button button-primary text-lg p-4 whitespace-nowrap">
+                            <span class="mr-2">➔</span>Find Services
+                        </button>
+                    </form>
+                    <p id="zipError" class="text-red-600 text-sm mt-3 h-5 font-medium"></p> 
+                </div>
+            </section>
+
+            <section id="howItWorks" class="section py-16 bg-white">
+                <div class="container mx-auto px-6">
+                    <h2 class="text-3xl font-bold text-center mb-16 text-gray-800">Getting Started with LocalProGo is Easy</h2>
+                    <div class="grid md:grid-cols-3 gap-10 text-center">
+                        <div class="flex flex-col items-center">
+                            <div class="bg-green-100 text-green-600 rounded-full p-5 text-4xl mb-5 shadow-md">📍</div>
+                            <h3 class="text-2xl font-semibold mb-3">1. Enter Zip Code</h3>
+                            <p class="text-gray-600 leading-relaxed">Tell us where you need service to instantly see available local professionals and transparent price estimates.</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="bg-blue-100 text-blue-600 rounded-full p-5 text-4xl mb-5 shadow-md">🔍</div>
+                            <h3 class="text-2xl font-semibold mb-3">2. Explore & Compare</h3>
+                            <p class="text-gray-600 leading-relaxed">Browse services, view detailed offerings, and compare price ranges without any commitment.</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="bg-purple-100 text-purple-600 rounded-full p-5 text-4xl mb-5 shadow-md">📅</div>
+                            <h3 class="text-2xl font-semibold mb-3">3. Book Securely</h3>
+                            <p class="text-gray-600 leading-relaxed">Choose your preferred pro, select a convenient time, and confirm your service online with ease.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="serviceCategories" class="section py-16 bg-gray-50">
+                <div class="container mx-auto px-6">
+                    <h2 class="text-3xl font-bold text-center mb-16 text-gray-800">Popular Services in Dallas, TX</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <a href="#" data-service="mowing" class="category-link card items-center text-center hover:shadow-xl group">
+                            <div class="text-5xl mb-4 transition-transform duration-300 group-hover:scale-110">🌿</div>
+                            <h4 class="font-semibold text-xl">Lawn Mowing</h4>
+                            <p class="text-sm text-gray-500 mt-1">Keep your lawn neat & tidy.</p>
+                        </a>
+                        <a href="#" data-service="mowingPlus" class="category-link card items-center text-center hover:shadow-xl group">
+                             <div class="text-5xl mb-4 transition-transform duration-300 group-hover:scale-110">🌳</div>
+                            <h4 class="font-semibold text-xl">Landscaping</h4>
+                            <p class="text-sm text-gray-500 mt-1">Design & maintain your dream yard.</p>
+                        </a>
+                        <a href="#" data-service="fertilization" class="category-link card items-center text-center hover:shadow-xl group">
+                             <div class="text-5xl mb-4 transition-transform duration-300 group-hover:scale-110">✨</div>
+                            <h4 class="font-semibold text-xl">Fertilization</h4>
+                            <p class="text-sm text-gray-500 mt-1">Nourish your lawn for health.</p>
+                        </a>
+                        <a href="#" data-service="weeding" class="category-link card items-center text-center hover:shadow-xl group">
+                             <div class="text-5xl mb-4 transition-transform duration-300 group-hover:scale-110">🌱</div>
+                            <h4 class="font-semibold text-xl">Weed Control</h4>
+                            <p class="text-sm text-gray-500 mt-1">Keep unwanted plants away.</p>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="whyChooseUs" class="section py-16 bg-white">
+                <div class="container mx-auto px-6">
+                    <h2 class="text-3xl font-bold text-center mb-16 text-gray-800">The LocalProGo Advantage</h2>
+                    <div class="grid md:grid-cols-3 gap-10">
+                        <div class="card text-center">
+                            <div class="text-3xl mb-4 accent-green">✔️</div>
+                            <h3 class="text-xl font-semibold mb-2">Vetted Local Professionals</h3>
+                            <p class="text-gray-600 leading-relaxed">Connect with trusted, skilled, and insured professionals in your immediate community.</p>
+                        </div>
+                        <div class="card text-center">
+                            <div class="text-3xl mb-4 accent-green">💲</div>
+                            <h3 class="text-xl font-semibold mb-2">Transparent Upfront Pricing</h3>
+                            <p class="text-gray-600 leading-relaxed">See estimated price ranges clearly before you commit or share any personal information.</p>
+                        </div>
+                        <div class="card text-center">
+                            <div class="text-3xl mb-4 accent-green">💻</div>
+                            <h3 class="text-xl font-semibold mb-2">Easy Online Booking</h3>
+                            <p class="text-gray-600 leading-relaxed">Schedule and manage all your home services conveniently from any device, anytime.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div id="exploreServicesView" class="view">
+            <section id="exploreServicesContent" class="section bg-gray-50">
+                <div class="container mx-auto text-center">
+                    <h2 class="text-4xl font-bold mb-6 text-gray-800">Explore Local Services</h2>
+                    <p id="exploreServicesIntro" class="text-lg text-gray-600 mb-10 max-w-3xl mx-auto">
+                        Showing available lawn care services and estimated prices for <strong id="exploreServicesZipDisplay" class="accent-green">your selected area</strong>. 
+                        Browse freely – no signup needed to see details and price ranges.
+                    </p>
+
+                    <div class="card max-w-2xl mx-auto">
+                        <h3 class="text-2xl font-semibold mb-6 text-gray-700">1. Select Service & Yard Size</h3>
+                        <div class="space-y-6 text-left">
+                            <div>
+                                <label for="serviceTypeExplore" class="block text-md font-medium text-gray-700 mb-1">Service Type:</label>
+                                <select id="serviceTypeExplore" class="mt-1 block w-full">
+                                    <option value="mowing">Lawn Mowing (Basic)</option>
+                                    <option value="mowingPlus">Lawn Mowing (Plus Package)</option>
+                                    <option value="fertilization">Fertilization</option>
+                                    <option value="weeding">Garden Bed Weeding</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="yardSizeExplore" class="block text-md font-medium text-gray-700 mb-1">Estimated Yard Size:</label>
+                                <select id="yardSizeExplore" class="mt-1 block w-full">
+                                    <option value="small">Small (under 3,000 sq ft)</option>
+                                    <option value="medium">Medium (3,000 - 7,000 sq ft)</option>
+                                    <option value="large">Large (7,000 - 10,000 sq ft)</option>
+                                    <option value="xlarge">Extra Large (10,000+ sq ft)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="serviceDetailsExplore" class="mt-8 p-6 bg-green-50 rounded-lg text-left border border-green-200">
+                            <h4 class="font-semibold text-xl accent-green mb-2">Service Details:</h4>
+                            <p id="serviceDescriptionExplore" class="text-md text-gray-700 mt-1 mb-3">Select a service and yard size to see details.</p>
+                            <p class="text-xl font-bold mt-2">Estimated Price Range: <span id="priceRangeExplore" class="accent-green text-2xl">$--</span></p>
+                            <p class="text-sm text-gray-500 mt-2">This is an estimate. Final price may be confirmed after address verification during booking.</p>
+                        </div>
+                        <button id="proceedToBookBtnExplore" class="button button-primary mt-8 w-full text-lg">Proceed to Book (Demo)</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="bookingDemoExplore" class="section hidden bg-white">
+                <div class="container mx-auto text-center">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800">2. Simulated Booking & Checkout</h2>
+                    <p class="text-lg text-gray-600 mb-10 max-w-3xl mx-auto">
+                        After exploring services, this is where we'd collect the necessary details to finalize your booking.
+                        Remember, this information is ONLY requested at the point of service confirmation.
+                    </p>
+                    <div class="card max-w-2xl mx-auto text-left">
+                        <h3 class="text-2xl font-semibold mb-6 accent-blue">Confirm Your Service (Demo)</h3>
+                        <p class="mb-2 text-md">Selected Service: <strong id="bookedServiceDisplayExplore" class="text-gray-700"></strong></p>
+                        <p class="mb-2 text-md">Yard Size: <strong id="bookedYardSizeDisplayExplore" class="text-gray-700"></strong></p>
+                        <p class="mb-6 text-xl">Estimated Price: <strong id="bookedPriceDisplayExplore" class="accent-green font-bold"></strong></p>
+                        
+                        <form id="bookingFormExplore" class="space-y-5">
+                            <div>
+                                <label for="addressExplore" class="block text-sm font-medium text-gray-700">Service Address:</label>
+                                <input type="text" id="addressExplore" name="address" placeholder="123 Main St, Dallas, TX 75201" class="mt-1" readonly value="123 Demo St, Dallas, TX 75201">
+                                <p class="text-xs text-gray-500 mt-1">GIS data might refine price based on actual lot size here.</p>
+                            </div>
+                            <div>
+                                <label for="dateExplore" class="block text-sm font-medium text-gray-700">Preferred Date & Time:</label>
+                                <input type="text" id="dateExplore" name="date" placeholder="Example: June 15th, 2025 - Morning" class="mt-1" readonly value="June 15th, 2025 - Morning Slot">
+                            </div>
+                            <div>
+                                <label for="nameExplore" class="block text-sm font-medium text-gray-700">Full Name:</label>
+                                <input type="text" id="nameExplore" name="name" placeholder="Your Full Name" class="mt-1" readonly value="Jane Doe (Demo)">
+                            </div>
+                            <div>
+                                <label for="emailExplore" class="block text-sm font-medium text-gray-700">Email Address:</label>
+                                <input type="email" id="emailExplore" name="email" placeholder="you@example.com" class="mt-1" readonly value="jane.doe@example.com">
+                            </div>
+                            <div>
+                                <label for="phoneExplore" class="block text-sm font-medium text-gray-700">Phone Number:</label>
+                                <input type="tel" id="phoneExplore" name="phone" placeholder="(555) 123-4567" class="mt-1" readonly value="(555) 123-4567">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Payment Information:</label>
+                                <div class="mt-1 p-4 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 italic">
+                                    Secure Payment Gateway Integration (e.g., Stripe or Braintree) would appear here.
+                                </div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row items-center justify-between mt-8 gap-4">
+                                <button type="button" class="button button-secondary w-full sm:w-auto">Create Account & Book (Demo)</button>
+                                <button type="button" class="text-md accent-blue hover:underline font-medium">Checkout as Guest (Demo)</button>
+                            </div>
+                            <div id="bookingConfirmationExplore" class="mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-md hidden">
+                                <h4 class="font-bold text-lg">Booking Confirmed (Demo)!</h4>
+                                <p>An email confirmation with your service details would be sent.</p>
+                            </div>
+                        </form>
+                         <button id="showBookingConfirmationBtnExplore" class="button button-primary mt-6 w-full text-lg">Simulate Confirmation</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="featuresExplore" class="section bg-gray-50">
+                <div class="container mx-auto">
+                    <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Platform Architecture Overview</h2>
+                    <p class="text-lg text-gray-600 mb-12 text-center max-w-3xl mx-auto">
+                        LocalProGo is built with distinct portals for customers, service providers, and administrators to ensure a smooth and efficient ecosystem.
+                    </p>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="card text-center">
+                            <div class="text-5xl mb-4 accent-green">👤</div>
+                            <h3 class="text-xl font-semibold mb-2">Customer Application</h3>
+                            <p class="text-sm text-gray-600 leading-relaxed">Focuses on anonymous browsing, transparent pricing, easy booking, and user account management.</p>
+                        </div>
+                        <div class="card text-center">
+                            <div class="text-5xl mb-4 accent-blue">🛠️</div>
+                            <h3 class="text-xl font-semibold mb-2">Service Provider Portal</h3>
+                            <p class="text-sm text-gray-600 leading-relaxed">Empowers vetted professionals to manage their profiles, services, availability, accept jobs, and track earnings efficiently.</p>
+                        </div>
+                        <div class="card text-center">
+                            <div class="text-5xl mb-4 text-gray-500">⚙️</div>
+                            <h3 class="text-xl font-semibold mb-2">Administrative Portal</h3>
+                            <p class="text-sm text-gray-600 leading-relaxed">Provides platform operators with tools to manage users, services, pricing, bookings, payments, and overall platform health.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="techExplore" class="section bg-white">
+                <div class="container mx-auto">
+                    <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Technology & Future Vision</h2>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="card">
+                            <h3 class="text-xl font-semibold mb-4 accent-green">Technology Stack (Considerations)</h3>
+                            <ul class="list-disc list-inside text-sm space-y-2 text-gray-600">
+                                <li>**Frontend:** Modern JavaScript framework (e.g., React, Vue.js) for a dynamic experience.</li>
+                                <li>**Backend:** Robust and scalable framework (e.g., Node.js/Express, Python/Django).</li>
+                                <li>**Database:** Relational (e.g., PostgreSQL) for structured data, potentially NoSQL for flexibility.</li>
+                                <li>**Cloud Hosting:** Scalable cloud solutions (AWS, GCP, or Azure).</li>
+                                <li>**Key Integrations:** Secure Payment Gateway, Mapping/GIS for addresses, Email/SMS notifications, Analytics.</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h3 class="text-xl font-semibold mb-4 accent-blue">Future Considerations (Post-MVP)</h3>
+                            <ul class="list-disc list-inside text-sm space-y-2 text-gray-600">
+                                <li>Native Mobile Applications (iOS & Android) for enhanced user experience.</li>
+                                <li>Advanced Provider Analytics and Business Management Tools.</li>
+                                <li>Customer Subscription Models for recurring services.</li>
+                                <li>AI-Powered Service Recommendations and Smart Quoting.</li>
+                                <li>Strategic Expansion to New Service Verticals and Geographic Areas.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center py-10">
+        <div class="container mx-auto px-6">
+            <p class="mb-3 text-lg">LocalProGo</p>
+            <p class="mb-4 text-sm">&copy; <span id="currentYear"></span> LocalProGo Demo. All rights reserved.</p>
+            <div class="space-x-4 text-sm">
+                <a href="#privacy" class="text-gray-400 hover:text-white hover:underline">Privacy Policy</a>
+                <span class="text-gray-500">|</span>
+                <a href="#terms" class="text-gray-400 hover:text-white hover:underline">Terms of Service</a>
+                <span class="text-gray-500">|</span>
+                <a href="#contact" class="text-gray-400 hover:text-white hover:underline">Contact Us</a>
+            </div>
+            <p class="text-xs mt-6 text-gray-500">This is an interactive demonstration SPA based on the "Homepage_TechRequirements_v1" and "LawnGenius_TechRequirements_v1" documents.</p>
+        </div>
+    </footer>
+
+    <script>
+        const serviceData = {
+            mowing: {
+                description: "Basic lawn mowing includes professional cutting of grass, precise edging along concrete surfaces (sidewalks, driveways), and blowing clippings off hardscapes for a clean finish.",
+                prices: { small: "$45-$60", medium: "$55-$75", large: "$70-$95", xlarge: "$90-$120" },
+                name: "Lawn Mowing (Basic)"
+            },
+            mowingPlus: {
+                description: "Plus Package includes basic mowing, edging, blowing, plus light trimming of bushes/shrubs immediately adjacent to the house foundation (up to 6ft height).",
+                prices: { small: "$65-$85", medium: "$80-$105", large: "$100-$130", xlarge: "$125-$160" },
+                name: "Landscaping (Mowing Plus)"
+            },
+            fertilization: {
+                description: "Application of premium, season-appropriate fertilizer to promote healthy lawn growth and vibrant color. Tailored to Dallas, TX climate and soil conditions.",
+                prices: { small: "$50-$70", medium: "$65-$90", large: "$85-$110", xlarge: "$100-$140" },
+                name: "Fertilization"
+            },
+            weeding: {
+                description: "Manual weeding of designated garden beds (up to specified square footage). Includes removal of common weeds. Does not include chemical treatments unless specified.",
+                prices: { small: "$40-$55 (per hour/small bed)", medium: "$50-$70 (per hour/medium bed)", large: "$60-$85 (per hour/large bed)", xlarge: "$70-$95 (per hour/xl bed)" },
+                name: "Weed Control (Garden Bed Weeding)"
+            }
+        };
+
+        // --- View Management ---
+        const views = document.querySelectorAll('.view');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const siteTitleLink = document.querySelector('.site-title');
+        let currentZipCode = "Dallas, TX"; // Default
+        let currentServiceSelection = null; // To store service selected from homepage categories
+
+        function setActiveView(viewId, data = {}) {
+            views.forEach(view => {
+                view.classList.toggle('active', view.id === viewId);
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.toggle('active-nav', link.getAttribute('href') === `#${viewId.replace('View','')}`);
+            });
+
+            if (viewId === 'exploreServicesView') {
+                const exploreZipDisplay = document.getElementById('exploreServicesZipDisplay');
+                if (data.zip && exploreZipDisplay) {
+                    currentZipCode = data.zip;
+                    exploreZipDisplay.textContent = `Zip Code ${currentZipCode}`;
+                } else if (exploreZipDisplay) {
+                    exploreZipDisplay.textContent = `Zip Code ${currentZipCode}`; 
+                }
+                const serviceTypeSelectExplore = document.getElementById('serviceTypeExplore');
+                if (data.service && serviceTypeSelectExplore) {
+                    currentServiceSelection = data.service;
+                    serviceTypeSelectExplore.value = currentServiceSelection;
+                }
+                updateExploreServicesDetails(); 
+            }
+            window.scrollTo(0, 0);
+        }
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetViewId = e.target.getAttribute('href').substring(1) + "View";
+                setActiveView(targetViewId);
+                history.pushState({view: targetViewId, zip: currentZipCode, service: currentServiceSelection}, "", e.target.getAttribute('href'));
+            });
+        });
+
+        if (siteTitleLink) {
+            siteTitleLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                setActiveView('homeView');
+                history.pushState({view: 'homeView'}, "", "#home");
+            });
+        }
+        
+        window.addEventListener('popstate', (event) => {
+            const targetView = (event.state && event.state.view) ? event.state.view : 'homeView';
+            const data = event.state || {};
+            setActiveView(targetView, data);
+        });
+
+        // --- Homepage Specific JS ---
+        const zipCodeForm = document.getElementById('zipCodeForm');
+        const zipCodeInput = document.getElementById('zipCodeInput');
+        const zipError = document.getElementById('zipError');
+        const categoryLinks = document.querySelectorAll('.category-link');
+
+        if (zipCodeForm) {
+            zipCodeForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const zip = zipCodeInput.value.trim();
+                zipError.textContent = ''; 
+                if (/^\d{5}$/.test(zip)) {
+                    currentZipCode = zip;
+                    const preselectedService = this.dataset.preselectedService;
+                    delete this.dataset.preselectedService;
+
+                    setActiveView('exploreServicesView', { zip: currentZipCode, service: preselectedService });
+                    history.pushState({view: 'exploreServicesView', zip: currentZipCode, service: preselectedService}, "", "#exploreServices");
+                } else {
+                    zipError.textContent = 'Please enter a valid 5-digit Zip Code.';
+                }
+            });
+        }
+        
+        categoryLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const service = this.dataset.service;
+                currentServiceSelection = service;
+                const currentZip = zipCodeInput.value.trim();
+
+                if (currentZip && /^\d{5}$/.test(currentZip)) {
+                    currentZipCode = currentZip;
+                    setActiveView('exploreServicesView', { zip: currentZipCode, service: currentServiceSelection });
+                    history.pushState({view: 'exploreServicesView', zip: currentZipCode, service: currentServiceSelection}, "", "#exploreServices");
+                } else { 
+                    zipCodeInput.focus();
+                    zipError.textContent = 'Please enter your Zip Code to see services.';
+                    if(zipCodeForm) zipCodeForm.dataset.preselectedService = service;
+                }
+            });
+        });
+
+        // --- Explore Services View Specific JS ---
+        const serviceTypeSelectExplore = document.getElementById('serviceTypeExplore');
+        const yardSizeSelectExplore = document.getElementById('yardSizeExplore');
+        const serviceDescriptionExploreEl = document.getElementById('serviceDescriptionExplore');
+        const priceRangeExploreEl = document.getElementById('priceRangeExplore');
+        const proceedToBookBtnExplore = document.getElementById('proceedToBookBtnExplore');
+        const bookingDemoExploreSection = document.getElementById('bookingDemoExplore');
+        
+        const bookedServiceDisplayExplore = document.getElementById('bookedServiceDisplayExplore');
+        const bookedYardSizeDisplayExplore = document.getElementById('bookedYardSizeDisplayExplore');
+        const bookedPriceDisplayExplore = document.getElementById('bookedPriceDisplayExplore');
+        const showBookingConfirmationBtnExplore = document.getElementById('showBookingConfirmationBtnExplore');
+        const bookingConfirmationExploreDiv = document.getElementById('bookingConfirmationExplore');
+
+        function updateExploreServicesDetails() {
+            if (!serviceTypeSelectExplore || !yardSizeSelectExplore || !serviceDescriptionExploreEl || !priceRangeExploreEl) return;
+
+            const selectedServiceKey = serviceTypeSelectExplore.value;
+            const selectedYardSizeKey = yardSizeSelectExplore.value;
+
+            if (serviceData[selectedServiceKey]) {
+                const service = serviceData[selectedServiceKey];
+                serviceDescriptionExploreEl.textContent = service.description;
+                priceRangeExploreEl.textContent = service.prices[selectedYardSizeKey] || "$--";
+            } else {
+                serviceDescriptionExploreEl.textContent = "Select a service and yard size to see details.";
+                priceRangeExploreEl.textContent = "$--";
+            }
+        }
+
+        if (serviceTypeSelectExplore) serviceTypeSelectExplore.addEventListener('change', updateExploreServicesDetails);
+        if (yardSizeSelectExplore) yardSizeSelectExplore.addEventListener('change', updateExploreServicesDetails);
+
+        if (proceedToBookBtnExplore) {
+            proceedToBookBtnExplore.addEventListener('click', () => {
+                if (!serviceTypeSelectExplore || !yardSizeSelectExplore || !bookedServiceDisplayExplore || !bookedYardSizeDisplayExplore || !bookedPriceDisplayExplore || !bookingDemoExploreSection) return;
+
+                const selectedServiceKey = serviceTypeSelectExplore.value;
+                const selectedYardSizeKey = yardSizeSelectExplore.value;
+                const service = serviceData[selectedServiceKey];
+                const yardSizeText = yardSizeSelectExplore.options[yardSizeSelectExplore.selectedIndex].text;
+
+                if (service) {
+                    bookedServiceDisplayExplore.textContent = service.name;
+                    bookedYardSizeDisplayExplore.textContent = yardSizeText;
+                    bookedPriceDisplayExplore.textContent = service.prices[selectedYardSizeKey] || "$--";
+                    bookingDemoExploreSection.classList.remove('hidden');
+                    bookingDemoExploreSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    if(bookingConfirmationExploreDiv) bookingConfirmationExploreDiv.classList.add('hidden');
+                } else {
+                    alert("Please select a service and yard size first to see booking details.");
+                }
+            });
+        }
+
+        if (showBookingConfirmationBtnExplore) {
+            showBookingConfirmationBtnExplore.addEventListener('click', () => {
+                 if(bookingConfirmationExploreDiv) bookingConfirmationExploreDiv.classList.remove('hidden');
+            });
+        }
+        
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // --- Initial View Setup based on Hash or Default to Home ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialHash = window.location.hash.substring(1); // remove #
+            let initialViewId = 'homeView';
+            let initialData = {};
+
+            if (initialHash === 'exploreServices') {
+                initialViewId = 'exploreServicesView';
+                if (history.state && history.state.zip) initialData.zip = history.state.zip;
+                if (history.state && history.state.service) initialData.service = history.state.service;
+            } else {
+                 history.replaceState({view: 'homeView'}, "", "#home");
+            }
+            setActiveView(initialViewId, initialData);
+        });
+
+    </script>
+</body>
+</html>
