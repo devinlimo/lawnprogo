@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Visualization & Content Choices:
         - Homepage: Zip Code input. Goal: Entry to service exploration. Interaction: Zip Code input -> Explore Services view. Library/Method: Vanilla JS.
-        - Explore Services - Provider Listing: Filters. Dynamic list of Provider items. Goal: Expedia-like browsing/comparison. Viz/Presentation: HTML/Tailwind list items. Interaction: Filters update list. Clicking provider item shows their specific price & populates booking. Library/Method: Vanilla JS.
+        - Explore Services - Provider Listing: Filters. Dynamic list of Provider items. Goal: Expedia-like browsing/comparison. Viz/Presentation: HTML/Tailwind list items. Provider images are dynamically generated via API. Interaction: Filters update list. Clicking provider item shows their specific price & populates booking. Library/Method: Vanilla JS, Gemini API for images.
         - Simulated Booking (Explore Services): Mock form. Goal: Show PII collection. Interaction: Triggered by provider selection. Library/Method: Vanilla JS.
         - For Providers Page: Mock Login form. Pricing Tiers table/cards. Goal: Show provider-facing aspects. Viz/Presentation: HTML/Tailwind. Interaction: Static display. Library/Method: HTML/Tailwind.
         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
@@ -122,13 +122,23 @@
             border-width: 2px;
             box-shadow: 0 0 15px rgba(40, 167, 69, 0.2);
         }
+        .provider-image-placeholder {
+            background-color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4A5568;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body class="antialiased">
 
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#home" class="text-3xl font-bold accent-green site-title">LocalProGo</a>
+            <a href="#home" class="text-3xl font-bold site-title">
+                <span class="accent-green">Local</span><span class="text-gray-800">Pro</span><span class="accent-green">Go</span>
+            </a>
             <nav class="space-x-2">
                 <a href="#home" class="nav-link text-gray-700 hover:accent-green px-3 py-2 rounded-md text-sm font-medium">Home</a>
                 <a href="#exploreServices" class="nav-link text-gray-700 hover:accent-green px-3 py-2 rounded-md text-sm font-medium">Explore Services</a>
@@ -183,7 +193,7 @@
             
             <section id="serviceCategories" class="section py-16 bg-gray-50">
                 <div class="container mx-auto px-6">
-                    <h2 class="text-3xl font-bold text-center mb-16 text-gray-800">Popular Services in Dallas, TX</h2>
+                    <h2 class="text-3xl font-bold text-center mb-16 text-gray-800">Popular Services near you</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         <a href="#" data-service="mowing" class="category-link card items-center text-center hover:shadow-xl group">
                             <div class="text-5xl mb-4 transition-transform duration-300 group-hover:scale-110">🌿</div>
@@ -462,13 +472,14 @@
             }
         };
 
-        const mockProviders = [
+        let mockProviders = [
             {
                 id: 1,
                 name: "GreenThumb Experts",
                 rating: 4.8,
                 reviewsCount: 150,
-                imageUrl: "https://placehold.co/600x400/A3E6B4/333333?text=GreenThumb+Pros",
+                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading...",
+                imagePrompt: "Photo of a lush, perfectly manicured green residential lawn on a sunny day, showcasing healthy grass and neat edging. Focus on the vibrant green color and overall pristine look. Bright, natural lighting, high quality.",
                 servicesOffered: ["mowing", "fertilization", "weeding", "mowingPlus"],
                 basePriceModifier: 1.0, 
                 bio: "Your local experts for a lush, healthy lawn. Serving Dallas for 10+ years with dedication and eco-friendly options.",
@@ -479,7 +490,8 @@
                 name: "Precision Lawn Care Dallas",
                 rating: 4.5,
                 reviewsCount: 85,
-                imageUrl: "https://placehold.co/600x400/9AE6B4/333333?text=Precision+Care",
+                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading...",
+                imagePrompt: "Action shot of a professional lawn care worker in uniform carefully mowing a lawn with a modern lawnmower, creating clean stripes on the grass. Sunny day, well-maintained suburban yard in the background, high quality photo.",
                 servicesOffered: ["mowing", "mowingPlus"],
                 basePriceModifier: 1.1, 
                 bio: "Meticulous mowing and edging. We treat every lawn like our own, ensuring picture-perfect results every time.",
@@ -490,7 +502,8 @@
                 name: "Budget Cuts Lawn Service",
                 rating: 4.2,
                 reviewsCount: 210,
-                imageUrl: "https://placehold.co/600x400/B3E6B4/333333?text=Budget+Cuts",
+                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading...",
+                imagePrompt: "Friendly-looking lawn care professional smiling, standing next to a clean work truck with basic lawn equipment visible (mower, trimmer). Clear, bright day, high quality photo.",
                 servicesOffered: ["mowing"],
                 basePriceModifier: 0.9, 
                 bio: "Affordable and reliable lawn mowing services for the Dallas area. Quality work that doesn't break the bank.",
@@ -501,7 +514,8 @@
                 name: "Yard Masters Inc.",
                 rating: 4.9,
                 reviewsCount: 300,
-                imageUrl: "https://placehold.co/600x400/87D3B4/333333?text=Yard+Masters",
+                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading...",
+                imagePrompt: "Photo of a beautifully landscaped residential front yard featuring colorful flower beds, neatly trimmed shrubs, and a healthy green lawn. High-quality landscaping work. Bright daylight, high quality photo.",
                 servicesOffered: ["mowing", "mowingPlus", "fertilization", "weeding"],
                 basePriceModifier: 1.15,
                 bio: "Premium lawn care and landscaping solutions. We transform yards into outdoor masterpieces.",
@@ -512,13 +526,59 @@
                 name: "Dallas Green Team",
                 rating: 4.6,
                 reviewsCount: 120,
-                imageUrl: "https://placehold.co/600x400/C1E8D4/333333?text=Green+Team",
+                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading...",
+                imagePrompt: "Close-up shot of a lawn care worker applying eco-friendly granular fertilizer to a green lawn. Focus on the application process and the healthy grass. Natural, outdoor lighting, high quality photo.",
                 servicesOffered: ["mowing", "fertilization"],
                 basePriceModifier: 0.95,
                 bio: "Eco-conscious lawn fertilization and maintenance. We use sustainable practices for a healthier planet.",
                 availability: "Next available: Wednesday"
             }
         ];
+
+        // --- Image Generation Function ---
+        async function generateImageForProvider(provider) {
+            const payload = { instances: [{ prompt: provider.imagePrompt }], parameters: { "sampleCount": 1 } };
+            const apiKey = ""; // API key will be injected by the environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    console.error(`Image generation failed for ${provider.name}: ${response.statusText}`);
+                    return provider.imageUrl; // Return placeholder on error
+                }
+                const result = await response.json();
+                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                    return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                } else {
+                    console.error(`Unexpected response structure for ${provider.name}:`, result);
+                    return provider.imageUrl; // Return placeholder
+                }
+            } catch (error) {
+                console.error(`Error generating image for ${provider.name}:`, error);
+                return provider.imageUrl; // Return placeholder on network error
+            }
+        }
+
+        async function loadProviderImages() {
+            const imagePromises = mockProviders.map(async (provider) => {
+                const generatedUrl = await generateImageForProvider(provider);
+                provider.imageUrl = generatedUrl; // Update the provider object
+                return provider; // Return the updated provider
+            });
+        
+            await Promise.allSettled(imagePromises);
+            // After all images attempted, re-render.
+            // This ensures that even if some images fail, the list still renders with placeholders for those.
+            if (document.getElementById('exploreServicesView').classList.contains('active')) {
+                 renderProviders();
+            }
+        }
+
 
         // --- View Management ---
         const views = document.querySelectorAll('.view');
@@ -528,6 +588,7 @@
         let currentServiceSelection = "all"; 
         let currentYardSizeSelection = "any";
         let currentSortBy = "rating";
+        let imagesLoaded = false;
 
         function setActiveView(viewId, data = {}) {
             views.forEach(view => {
@@ -560,8 +621,17 @@
 
                 const filterSortBy = document.getElementById('filterSortBy');
                 if(filterSortBy) filterSortBy.value = currentSortBy;
+                
+                renderProviders(); // Render with placeholders first
+                if (!imagesLoaded) {
+                    loadProviderImages().then(() => {
+                        imagesLoaded = true; 
+                        // Re-render might not be strictly necessary if individual images are updated
+                        // but can be a failsafe if direct DOM manipulation of images is complex.
+                        // For this version, loadProviderImages updates mockProviders array and then renderProviders uses it.
+                    });
+                }
 
-                renderProviders();
             }
             window.scrollTo(0, 0);
         }
@@ -695,6 +765,7 @@
             filteredProviders.forEach(provider => {
                 const listItem = document.createElement('div');
                 listItem.className = 'provider-list-item p-6 flex flex-col sm:flex-row gap-6 items-start'; 
+                listItem.id = `provider-${provider.id}`;
                 
                 const effectiveServiceKey = currentServiceSelection === 'all' ? provider.servicesOffered[0] : currentServiceSelection;
                 const effectiveYardSizeKey = currentYardSizeSelection === 'any' ? 'medium' : currentYardSizeSelection;
@@ -704,9 +775,13 @@
                     const serviceDetail = serviceData[serviceKey];
                     return `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full mr-1 mb-1 inline-block">${serviceDetail ? serviceDetail.name.split('(')[0].trim() : serviceKey}</span>`;
                 }).join('');
+                
+                // Use a placeholder div for the image that will be updated
+                const imageHTML = `<div id="img-provider-${provider.id}" class="provider-image-placeholder w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0">Loading Image...</div>`;
+
 
                 listItem.innerHTML = `
-                    <img src="${provider.imageUrl}" alt="${provider.name}" class="w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/400x400/E2E8F0/4A5568?text=Pro+Image';">
+                    ${imageHTML}
                     <div class="flex-grow">
                         <h4 class="text-2xl font-semibold mb-1 text-gray-800">${provider.name}</h4>
                         <div class="star-rating text-sm text-gray-600 mb-2 flex items-center">
@@ -731,6 +806,16 @@
                     </div>
                 `;
                 providerListingsContainer.appendChild(listItem);
+                // After appending, update the image if it's already loaded
+                const imgContainer = document.getElementById(`img-provider-${provider.id}`);
+                if (provider.imageUrl && !provider.imageUrl.startsWith('https://placehold.co')) {
+                    imgContainer.innerHTML = `<img src="${provider.imageUrl}" alt="${provider.name}" class="w-full h-full object-cover rounded-lg">`;
+                    imgContainer.classList.remove('provider-image-placeholder');
+                } else if (provider.imageUrl.startsWith('https://placehold.co') && provider.imageUrl.includes('Error')) {
+                     imgContainer.textContent = 'Image Error';
+                }
+
+
             });
 
             document.querySelectorAll('.proceed-to-book-provider-btn').forEach(button => {
@@ -739,7 +824,7 @@
         }
         
         function handleProceedToBookFromProvider(event) {
-            const button = event.currentTarget; // Use currentTarget
+            const button = event.currentTarget; 
             const providerId = parseInt(button.dataset.providerId);
             const serviceKey = button.dataset.serviceKey;
             const yardSizeKey = button.dataset.yardSizeKey;
@@ -776,7 +861,6 @@
         if (providerLoginForm) {
             providerLoginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                // Mock login action
                 alert('Provider login attempt (demo). In a real app, this would authenticate.');
             });
         }
