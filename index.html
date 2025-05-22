@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Visualization & Content Choices:
         - Homepage: Zip Code input. Goal: Entry to service exploration. Interaction: Zip Code input -> Explore Services view. Library/Method: Vanilla JS.
-        - Explore Services - Provider Listing: Filters. Dynamic list of Provider items. Goal: Expedia-like browsing/comparison. Viz/Presentation: HTML/Tailwind list items. Provider images are dynamically generated via API. Interaction: Filters update list. Clicking provider item shows their specific price & populates booking. Library/Method: Vanilla JS, Gemini API for images.
+        - Explore Services - Provider Listing: Filters. Dynamic list of Provider items. Goal: Expedia-like browsing/comparison. Viz/Presentation: HTML/Tailwind list items. Provider images are descriptive placeholders. Interaction: Filters update list. Clicking provider item shows their specific price & populates booking. Library/Method: Vanilla JS.
         - Simulated Booking (Explore Services): Mock form. Goal: Show PII collection. Interaction: Triggered by provider selection. Library/Method: Vanilla JS.
         - For Providers Page: Mock Login form. Pricing Tiers table/cards. Goal: Show provider-facing aspects. Viz/Presentation: HTML/Tailwind. Interaction: Static display. Library/Method: HTML/Tailwind.
         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
@@ -480,8 +480,7 @@
                 name: "GreenThumb Experts",
                 rating: 4.8,
                 reviewsCount: 150,
-                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading+Image...",
-                imagePrompt: "Photo of a lush, perfectly manicured green residential lawn on a sunny day, showcasing healthy grass and neat edging. Focus on the vibrant green color and overall pristine look. Bright, natural lighting, high quality.",
+                imageUrl: "https://placehold.co/400x300/A3E6B4/333333?text=Lush+Green+Lawn",
                 servicesOffered: ["mowing", "fertilization", "weeding", "mowingPlus"],
                 basePriceModifier: 1.0, 
                 bio: "Your local experts for a lush, healthy lawn. Serving Dallas for 10+ years with dedication and eco-friendly options.",
@@ -492,8 +491,7 @@
                 name: "Precision Lawn Care Dallas",
                 rating: 4.5,
                 reviewsCount: 85,
-                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading+Image...",
-                imagePrompt: "Action shot of a professional lawn care worker in uniform carefully mowing a lawn with a modern lawnmower, creating clean stripes on the grass. Sunny day, well-maintained suburban yard in the background, high quality photo.",
+                imageUrl: "https://placehold.co/400x300/9AE6B4/333333?text=Pro+Mowing+Service",
                 servicesOffered: ["mowing", "mowingPlus"],
                 basePriceModifier: 1.1, 
                 bio: "Meticulous mowing and edging. We treat every lawn like our own, ensuring picture-perfect results every time.",
@@ -504,8 +502,7 @@
                 name: "Budget Cuts Lawn Service",
                 rating: 4.2,
                 reviewsCount: 210,
-                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading+Image...",
-                imagePrompt: "Friendly-looking lawn care professional smiling, standing next to a clean work truck with basic lawn equipment visible (mower, trimmer). Clear, bright day, high quality photo.",
+                imageUrl: "https://placehold.co/400x300/B3E6B4/333333?text=Friendly+Lawn+Team",
                 servicesOffered: ["mowing"],
                 basePriceModifier: 0.9, 
                 bio: "Affordable and reliable lawn mowing services for the Dallas area. Quality work that doesn't break the bank.",
@@ -516,8 +513,7 @@
                 name: "Yard Masters Inc.",
                 rating: 4.9,
                 reviewsCount: 300,
-                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading+Image...",
-                imagePrompt: "Photo of a beautifully landscaped residential front yard featuring colorful flower beds, neatly trimmed shrubs, and a healthy green lawn. High-quality landscaping work. Bright daylight, high quality photo.",
+                imageUrl: "https://placehold.co/400x300/87D3B4/333333?text=Beautiful+Landscaping",
                 servicesOffered: ["mowing", "mowingPlus", "fertilization", "weeding"],
                 basePriceModifier: 1.15,
                 bio: "Premium lawn care and landscaping solutions. We transform yards into outdoor masterpieces.",
@@ -528,79 +524,13 @@
                 name: "Dallas Green Team",
                 rating: 4.6,
                 reviewsCount: 120,
-                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading+Image...",
-                imagePrompt: "Close-up shot of a lawn care worker applying eco-friendly granular fertilizer to a green lawn. Focus on the application process and the healthy grass. Natural, outdoor lighting, high quality photo.",
+                imageUrl: "https://placehold.co/400x300/C1E8D4/333333?text=Eco+Fertilizing",
                 servicesOffered: ["mowing", "fertilization"],
                 basePriceModifier: 0.95,
                 bio: "Eco-conscious lawn fertilization and maintenance. We use sustainable practices for a healthier planet.",
                 availability: "Next available: Wednesday"
             }
         ];
-
-        // --- Image Generation Function ---
-        async function generateImageForProvider(provider) {
-            const payload = { instances: [{ prompt: provider.imagePrompt }], parameters: { "sampleCount": 1 } };
-            const apiKey = ""; 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-            const errorPlaceholderUrl = `https://placehold.co/400x400/FFCDD2/B71C1C?text=Image+Gen+Error`;
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    let errorData = null;
-                    try { errorData = await response.json(); } catch (e) { /* ignore */ }
-                    console.error(`Image generation API error for ${provider.name}: ${response.status} ${response.statusText}`, errorData || '(No JSON error body)');
-                    return errorPlaceholderUrl; 
-                }
-                const result = await response.json();
-                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
-                    return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
-                } else {
-                    console.error(`Unexpected API response structure for ${provider.name}:`, result);
-                    return errorPlaceholderUrl; 
-                }
-            } catch (error) {
-                console.error(`Network or other error generating image for ${provider.name}:`, error);
-                return errorPlaceholderUrl; 
-            }
-        }
-
-        async function loadProviderImages() {
-            const imageUpdatePromises = mockProviders.map(async (provider) => {
-                const generatedUrl = await generateImageForProvider(provider);
-                provider.imageUrl = generatedUrl; 
-                // Update the specific image container if it's already rendered
-                const imgContainer = document.getElementById(`img-provider-${provider.id}`);
-                if (imgContainer) {
-                    if (generatedUrl && !generatedUrl.startsWith('https://placehold.co')) {
-                        imgContainer.innerHTML = `<img src="${generatedUrl}" alt="${provider.name}" class="w-full h-full object-cover rounded-lg">`;
-                        imgContainer.classList.remove('provider-image-placeholder');
-                        imgContainer.style.backgroundColor = 'transparent';
-                        imgContainer.style.color = 'inherit';
-                    } else { // Handle error placeholder specifically
-                        imgContainer.textContent = 'Image Gen Error';
-                        imgContainer.classList.add('provider-image-placeholder');
-                        imgContainer.style.backgroundColor = '#FFCDD2'; 
-                        imgContainer.style.color = '#B71C1C';
-                    }
-                }
-                return provider;
-            });
-        
-            await Promise.allSettled(imageUpdatePromises);
-            // If the view is active but was rendered before images loaded, a full re-render might be needed
-            // or ensure individual updates are sufficient. For now, individual updates are attempted.
-            if (document.getElementById('exploreServicesView').classList.contains('active')) {
-                 // If renderProviders was called with initial placeholders, this ensures they get updated
-                 // if some images resolve after initial render.
-                 renderProviders(); 
-            }
-        }
-
 
         // --- View Management ---
         const views = document.querySelectorAll('.view');
@@ -610,7 +540,6 @@
         let currentServiceSelection = "all"; 
         let currentYardSizeSelection = "any";
         let currentSortBy = "rating";
-        let imagesLoaded = false;
 
         function setActiveView(viewId, data = {}) {
             views.forEach(view => {
@@ -645,12 +574,6 @@
                 if(filterSortBy) filterSortBy.value = currentSortBy;
                 
                 renderProviders(); 
-                if (!imagesLoaded) {
-                    loadProviderImages().then(() => {
-                        imagesLoaded = true; 
-                    });
-                }
-
             }
             window.scrollTo(0, 0);
         }
@@ -795,14 +718,7 @@
                     return `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full mr-1 mb-1 inline-block">${serviceDetail ? serviceDetail.name.split('(')[0].trim() : serviceKey}</span>`;
                 }).join('');
                 
-                const imgContainerId = `img-provider-${provider.id}`;
-                let imageHTML = `<div id="${imgContainerId}" class="provider-image-placeholder w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0">Loading Image...</div>`;
-                if (provider.imageUrl && !provider.imageUrl.startsWith('https://placehold.co') && !provider.imageUrl.includes('Image+Gen+Error')) {
-                     imageHTML = `<img src="${provider.imageUrl}" alt="${provider.name}" class="w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0">`;
-                } else if (provider.imageUrl && provider.imageUrl.includes('Image+Gen+Error')) {
-                     imageHTML = `<div id="${imgContainerId}" class="provider-image-placeholder w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0" style="background-color: #FFCDD2; color: #B71C1C;">Image Gen Error</div>`;
-                }
-
+                const imageHTML = `<img src="${provider.imageUrl}" alt="${provider.name}" class="w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/400x300/FEE2E2/B91C1C?text=Image+Error';this.classList.add('provider-image-placeholder');this.style.backgroundColor='#FEE2E2'; this.style.color='#B91C1C';">`;
 
                 listItem.innerHTML = `
                     ${imageHTML}
