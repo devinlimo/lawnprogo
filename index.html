@@ -8,16 +8,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Visualization & Content Choices:
-        - Report Info: Homepage vision (Homepage_TechRequirements_v1 Sec 1 & 2). Goal: Demonstrate Expedia-like entry. Viz/Presentation: Hero with Zip Code input, static "How it Works", "Categories", "Why Us" sections. Interaction: Zip Code input + button click transitions to Blueprint view. Justification: Core UX differentiator. Library/Method: Vanilla JS for view switching.
-        - Report Info: Anonymous service browsing & pricing (LawnGenius_TechRequirements_v1 REQ-CUST-001-005). Goal: Show transparent price discovery. Viz/Presentation: Interactive dropdowns (service type, yard size), dynamic text (description, price range) in Blueprint view. Interaction: User selections update info. Justification: Core UX of platform. Library/Method: Vanilla JS.
-        - Report Info: Simulated booking (LawnGenius_TechRequirements_v1 REQ-CUST-006-012). Goal: Show PII collection point. Viz/Presentation: Mock form fields in Blueprint view. Interaction: Button click reveals form. Justification: Illustrates user flow. Library/Method: Vanilla JS.
-        - Report Info: Platform components overview (LawnGenius_TechRequirements_v1 Sec 1.2, 1.3), Tech/Future (LawnGenius_TechRequirements_v1 Sec 7, 8). Goal: Provide context. Viz/Presentation: Static cards/lists in Blueprint view. Justification: Completes platform overview. Library/Method: HTML/Tailwind.
+        - Homepage: Zip Code input. Goal: Entry to service exploration. Interaction: Zip Code input -> Explore Services view. Library/Method: Vanilla JS.
+        - Explore Services - Provider Listing: Filters. Dynamic list of Provider items. Goal: Expedia-like browsing/comparison. Viz/Presentation: HTML/Tailwind list items. Interaction: Filters update list. Clicking provider item shows their specific price & populates booking. Library/Method: Vanilla JS.
+        - Simulated Booking (Explore Services): Mock form. Goal: Show PII collection. Interaction: Triggered by provider selection. Library/Method: Vanilla JS.
+        - For Providers Page: Mock Login form. Pricing Tiers table/cards. Goal: Show provider-facing aspects. Viz/Presentation: HTML/Tailwind. Interaction: Static display. Library/Method: HTML/Tailwind.
         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
     -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa; /* Lighter neutral background */
+            background-color: #f8f9fa; 
             color: #343a40; 
         }
         .accent-green { color: #28a745; }
@@ -28,7 +28,7 @@
         .accent-blue-bg-hover:hover { background-color: #0056b3; }
         
         .section {
-            padding: 48px 24px; /* Consistent padding */
+            padding: 48px 24px; 
         }
         .card {
             background-color: white;
@@ -36,6 +36,8 @@
             padding: 28px;
             box-shadow: 0 6px 12px rgba(0,0,0,0.07);
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
         }
         .card:hover {
             transform: translateY(-6px);
@@ -57,21 +59,21 @@
         }
 
         .button-primary {
-            background-color: #28a745; /* Green accent */
+            background-color: #28a745; 
             color: white;
         }
         .button-primary:hover {
             background-color: #218838;
         }
         .button-secondary {
-            background-color: #007bff; /* Blue accent */
+            background-color: #007bff; 
             color: white;
         }
         .button-secondary:hover {
             background-color: #0056b3;
         }
         
-        select, input[type="text"], input[type="email"], input[type="tel"], input[type="search"] {
+        select, input[type="text"], input[type="email"], input[type="tel"], input[type="search"], input[type="password"] {
             border: 1px solid #ced4da; 
             padding: 12px 16px; 
             border-radius: 8px; 
@@ -93,12 +95,32 @@
         }
 
         .hero-bg {
-             background: linear-gradient(135deg, #e0f2f7 0%, #d1e7dd 100%); /* Gradient background */
+             background: linear-gradient(135deg, #e0f2f7 0%, #d1e7dd 100%); 
         }
         header nav a.active-nav {
             color: #28a745;
             font-weight: 600;
             border-bottom: 2px solid #28a745;
+        }
+        .star-rating span {
+            color: #ffc107; /* Yellow for stars */
+        }
+        .provider-list-item {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        .provider-list-item:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .pricing-tier-card {
+            border: 1px solid #e2e8f0;
+        }
+        .pricing-tier-card.recommended {
+            border-color: #28a745;
+            border-width: 2px;
+            box-shadow: 0 0 15px rgba(40, 167, 69, 0.2);
         }
     </style>
 </head>
@@ -109,7 +131,8 @@
             <a href="#home" class="text-3xl font-bold accent-green site-title">LocalProGo</a>
             <nav class="space-x-2">
                 <a href="#home" class="nav-link text-gray-700 hover:accent-green px-3 py-2 rounded-md text-sm font-medium">Home</a>
-                <a href="#blueprint" class="nav-link text-gray-700 hover:accent-green px-3 py-2 rounded-md text-sm font-medium">Platform Blueprint</a>
+                <a href="#exploreServices" class="nav-link text-gray-700 hover:accent-green px-3 py-2 rounded-md text-sm font-medium">Explore Services</a>
+                <a href="#providers" class="nav-link text-gray-700 hover:accent-green px-3 py-2 rounded-md text-sm font-medium">For Providers</a>
             </nav>
         </div>
     </header>
@@ -147,7 +170,7 @@
                         <div class="flex flex-col items-center">
                             <div class="bg-blue-100 text-blue-600 rounded-full p-5 text-4xl mb-5 shadow-md">🔍</div>
                             <h3 class="text-2xl font-semibold mb-3">2. Explore & Compare</h3>
-                            <p class="text-gray-600 leading-relaxed">Browse services, view detailed offerings, and compare price ranges without any commitment.</p>
+                            <p class="text-gray-600 leading-relaxed">Browse services and providers, view detailed offerings, and compare price ranges without any commitment.</p>
                         </div>
                         <div class="flex flex-col items-center">
                             <div class="bg-purple-100 text-purple-600 rounded-full p-5 text-4xl mb-5 shadow-md">📅</div>
@@ -210,83 +233,93 @@
             </section>
         </div>
 
-        <div id="blueprintView" class="view">
-            <section id="exploreBlueprint" class="section bg-gray-50">
-                <div class="container mx-auto text-center">
-                    <h2 class="text-4xl font-bold mb-6 text-gray-800">LocalProGo Platform Blueprint</h2>
-                    <p id="blueprintIntro" class="text-lg text-gray-600 mb-10 max-w-3xl mx-auto">
-                        Explore available lawn care services and estimated prices for <strong id="blueprintZipDisplay" class="accent-green">your selected area</strong>. 
-                        This demo illustrates our commitment to transparent, upfront information without requiring signup.
-                    </p>
+        <div id="exploreServicesView" class="view">
+            <section id="exploreServicesContent" class="section bg-gray-100">
+                <div class="container mx-auto">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-bold mb-4 text-gray-800">Explore Local Pros</h2>
+                        <p id="exploreServicesIntro" class="text-lg text-gray-600 max-w-3xl mx-auto">
+                            Showing available lawn care professionals for <strong id="exploreServicesZipDisplay" class="accent-green">your selected area</strong>. 
+                            Use the filters to refine your search.
+                        </p>
+                    </div>
 
-                    <div class="card max-w-2xl mx-auto">
-                        <h3 class="text-2xl font-semibold mb-6 text-gray-700">1. Explore Lawn Care Services (Anonymously)</h3>
-                        <div class="space-y-6 text-left">
+                    <div class="bg-white p-6 rounded-xl shadow-lg mb-10 sticky top-20 z-40">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700">Filter Services & Providers</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label for="serviceTypeBlueprint" class="block text-md font-medium text-gray-700 mb-1">Select Service:</label>
-                                <select id="serviceTypeBlueprint" class="mt-1 block w-full">
+                                <label for="filterServiceType" class="block text-sm font-medium text-gray-700 mb-1">Service Type:</label>
+                                <select id="filterServiceType" class="mt-1 block w-full">
+                                    <option value="all">All Lawn Services</option>
                                     <option value="mowing">Lawn Mowing (Basic)</option>
-                                    <option value="mowingPlus">Lawn Mowing (Plus Package)</option>
+                                    <option value="mowingPlus">Landscaping (Mowing Plus)</option>
                                     <option value="fertilization">Fertilization</option>
-                                    <option value="weeding">Garden Bed Weeding</option>
+                                    <option value="weeding">Weed Control</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="yardSizeBlueprint" class="block text-md font-medium text-gray-700 mb-1">Select Estimated Yard Size:</label>
-                                <select id="yardSizeBlueprint" class="mt-1 block w-full">
+                                <label for="filterYardSize" class="block text-sm font-medium text-gray-700 mb-1">Estimated YardSize:</label>
+                                <select id="filterYardSize" class="mt-1 block w-full">
+                                    <option value="any">Any Size</option>
                                     <option value="small">Small (under 3,000 sq ft)</option>
                                     <option value="medium">Medium (3,000 - 7,000 sq ft)</option>
                                     <option value="large">Large (7,000 - 10,000 sq ft)</option>
                                     <option value="xlarge">Extra Large (10,000+ sq ft)</option>
                                 </select>
                             </div>
+                            <div>
+                                <label for="filterSortBy" class="block text-sm font-medium text-gray-700 mb-1">Sort By:</label>
+                                <select id="filterSortBy" class="mt-1 block w-full">
+                                    <option value="rating">Highest Rated</option>
+                                    <option value="reviews">Most Reviews</option>
+                                    <option value="name_asc">Name (A-Z)</option>
+                                </select>
+                            </div>
                         </div>
-
-                        <div id="serviceDetailsBlueprint" class="mt-8 p-6 bg-green-50 rounded-lg text-left border border-green-200">
-                            <h4 class="font-semibold text-xl accent-green mb-2">Service Details:</h4>
-                            <p id="serviceDescriptionBlueprint" class="text-md text-gray-700 mt-1 mb-3">Select a service and yard size to see details.</p>
-                            <p class="text-xl font-bold mt-2">Estimated Price Range: <span id="priceRangeBlueprint" class="accent-green text-2xl">$--</span></p>
-                            <p class="text-sm text-gray-500 mt-2">This is an estimate. Final price may be confirmed after address verification during booking.</p>
-                        </div>
-                        <button id="proceedToBookBtnBlueprint" class="button button-primary mt-8 w-full text-lg">Proceed to Book (Demo)</button>
                     </div>
+
+                    <div id="providerListingsContainer" class="space-y-6">
+                        </div>
+                    <p id="noProvidersMessage" class="text-center text-gray-500 py-10 hidden">No providers match your current filters. Try adjusting your search.</p>
+
                 </div>
             </section>
 
-            <section id="bookingDemoBlueprint" class="section hidden bg-white">
+            <section id="bookingDemoExplore" class="section hidden bg-white">
                 <div class="container mx-auto text-center">
-                    <h2 class="text-3xl font-bold mb-6 text-gray-800">2. Simulated Booking & Checkout</h2>
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800">Simulated Booking & Checkout</h2>
                     <p class="text-lg text-gray-600 mb-10 max-w-3xl mx-auto">
-                        After exploring services, this is where we'd collect the necessary details to finalize your booking.
-                        Remember, this information is ONLY requested at the point of service confirmation.
+                        You're about to book with <strong id="bookingProviderName" class="accent-green"></strong>.
+                        Please confirm the details below. This information is ONLY requested at the point of service confirmation.
                     </p>
                     <div class="card max-w-2xl mx-auto text-left">
                         <h3 class="text-2xl font-semibold mb-6 accent-blue">Confirm Your Service (Demo)</h3>
-                        <p class="mb-2 text-md">Selected Service: <strong id="bookedServiceDisplayBlueprint" class="text-gray-700"></strong></p>
-                        <p class="mb-2 text-md">Yard Size: <strong id="bookedYardSizeDisplayBlueprint" class="text-gray-700"></strong></p>
-                        <p class="mb-6 text-xl">Estimated Price: <strong id="bookedPriceDisplayBlueprint" class="accent-green font-bold"></strong></p>
+                        <p class="mb-2 text-md">Provider: <strong id="confirmProviderName" class="text-gray-700"></strong></p>
+                        <p class="mb-2 text-md">Selected Service: <strong id="bookedServiceDisplayExplore" class="text-gray-700"></strong></p>
+                        <p class="mb-2 text-md">Yard Size: <strong id="bookedYardSizeDisplayExplore" class="text-gray-700"></strong></p>
+                        <p class="mb-6 text-xl">Estimated Price: <strong id="bookedPriceDisplayExplore" class="accent-green font-bold"></strong></p>
                         
-                        <form id="bookingFormBlueprint" class="space-y-5">
+                        <form id="bookingFormExplore" class="space-y-5">
                             <div>
-                                <label for="addressBlueprint" class="block text-sm font-medium text-gray-700">Service Address:</label>
-                                <input type="text" id="addressBlueprint" name="address" placeholder="123 Main St, Dallas, TX 75201" class="mt-1" readonly value="123 Demo St, Dallas, TX 75201">
+                                <label for="addressExplore" class="block text-sm font-medium text-gray-700">Service Address:</label>
+                                <input type="text" id="addressExplore" name="address" placeholder="123 Main St, Dallas, TX 75201" class="mt-1" readonly value="123 Demo St, Dallas, TX 75201">
                                 <p class="text-xs text-gray-500 mt-1">GIS data might refine price based on actual lot size here.</p>
                             </div>
                             <div>
-                                <label for="dateBlueprint" class="block text-sm font-medium text-gray-700">Preferred Date & Time:</label>
-                                <input type="text" id="dateBlueprint" name="date" placeholder="Example: June 15th, 2025 - Morning" class="mt-1" readonly value="June 15th, 2025 - Morning Slot">
+                                <label for="dateExplore" class="block text-sm font-medium text-gray-700">Preferred Date & Time:</label>
+                                <input type="text" id="dateExplore" name="date" placeholder="Example: June 15th, 2025 - Morning" class="mt-1" readonly value="June 15th, 2025 - Morning Slot">
                             </div>
                             <div>
-                                <label for="nameBlueprint" class="block text-sm font-medium text-gray-700">Full Name:</label>
-                                <input type="text" id="nameBlueprint" name="name" placeholder="Your Full Name" class="mt-1" readonly value="Jane Doe (Demo)">
+                                <label for="nameExplore" class="block text-sm font-medium text-gray-700">Full Name:</label>
+                                <input type="text" id="nameExplore" name="name" placeholder="Your Full Name" class="mt-1" readonly value="Jane Doe (Demo)">
                             </div>
                             <div>
-                                <label for="emailBlueprint" class="block text-sm font-medium text-gray-700">Email Address:</label>
-                                <input type="email" id="emailBlueprint" name="email" placeholder="you@example.com" class="mt-1" readonly value="jane.doe@example.com">
+                                <label for="emailExplore" class="block text-sm font-medium text-gray-700">Email Address:</label>
+                                <input type="email" id="emailExplore" name="email" placeholder="you@example.com" class="mt-1" readonly value="jane.doe@example.com">
                             </div>
                             <div>
-                                <label for="phoneBlueprint" class="block text-sm font-medium text-gray-700">Phone Number:</label>
-                                <input type="tel" id="phoneBlueprint" name="phone" placeholder="(555) 123-4567" class="mt-1" readonly value="(555) 123-4567">
+                                <label for="phoneExplore" class="block text-sm font-medium text-gray-700">Phone Number:</label>
+                                <input type="tel" id="phoneExplore" name="phone" placeholder="(555) 123-4567" class="mt-1" readonly value="(555) 123-4567">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Payment Information:</label>
@@ -298,67 +331,91 @@
                                 <button type="button" class="button button-secondary w-full sm:w-auto">Create Account & Book (Demo)</button>
                                 <button type="button" class="text-md accent-blue hover:underline font-medium">Checkout as Guest (Demo)</button>
                             </div>
-                            <div id="bookingConfirmationBlueprint" class="mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-md hidden">
+                            <div id="bookingConfirmationExplore" class="mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-md hidden">
                                 <h4 class="font-bold text-lg">Booking Confirmed (Demo)!</h4>
                                 <p>An email confirmation with your service details would be sent.</p>
                             </div>
                         </form>
-                         <button id="showBookingConfirmationBtnBlueprint" class="button button-primary mt-6 w-full text-lg">Simulate Confirmation</button>
+                         <button id="showBookingConfirmationBtnExplore" class="button button-primary mt-6 w-full text-lg">Simulate Confirmation</button>
                     </div>
                 </div>
             </section>
+        </div>
 
-            <section id="featuresBlueprint" class="section bg-gray-50">
+        <div id="providersView" class="view">
+            <section class="section bg-gray-50">
                 <div class="container mx-auto">
-                    <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">3. Core Platform Architecture</h2>
-                    <p class="text-lg text-gray-600 mb-12 text-center max-w-3xl mx-auto">
-                        This platform is designed with distinct portals for customers, service providers, and administrators to ensure a smooth and efficient ecosystem, as detailed in the technical requirements.
-                    </p>
-                    <div class="grid md:grid-cols-3 gap-8">
-                        <div class="card text-center">
-                            <div class="text-5xl mb-4 accent-green">👤</div>
-                            <h3 class="text-xl font-semibold mb-2">Customer Application</h3>
-                            <p class="text-sm text-gray-600 leading-relaxed">Focuses on anonymous browsing, transparent pricing, easy booking, and user account management (as demonstrated).</p>
-                        </div>
-                        <div class="card text-center">
-                            <div class="text-5xl mb-4 accent-blue">🛠️</div>
-                            <h3 class="text-xl font-semibold mb-2">Service Provider Portal</h3>
-                            <p class="text-sm text-gray-600 leading-relaxed">Empowers vetted professionals to manage their profiles, services, availability, accept jobs, and track earnings efficiently.</p>
-                        </div>
-                        <div class="card text-center">
-                            <div class="text-5xl mb-4 text-gray-500">⚙️</div>
-                            <h3 class="text-xl font-semibold mb-2">Administrative Portal</h3>
-                            <p class="text-sm text-gray-600 leading-relaxed">Provides platform operators with tools to manage users, services, pricing, bookings, payments, and overall platform health.</p>
-                        </div>
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl font-bold mb-4 text-gray-800">Join LocalProGo as a Service Professional</h2>
+                        <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                            Grow your business by connecting with homeowners in your area looking for your expertise. We provide the tools and support you need to succeed.
+                        </p>
                     </div>
-                </div>
-            </section>
 
-            <section id="techBlueprint" class="section bg-white">
-                <div class="container mx-auto">
-                    <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">4. Technology & Future Vision</h2>
-                    <div class="grid md:grid-cols-2 gap-8">
+                    <div class="grid md:grid-cols-2 gap-12 items-start">
                         <div class="card">
-                            <h3 class="text-xl font-semibold mb-4 accent-green">Technology Stack (Considerations)</h3>
-                            <ul class="list-disc list-inside text-sm space-y-2 text-gray-600">
-                                <li>**Frontend:** Modern JavaScript framework (e.g., React, Vue.js) for a dynamic experience.</li>
-                                <li>**Backend:** Robust and scalable framework (e.g., Node.js/Express, Python/Django).</li>
-                                <li>**Database:** Relational (e.g., PostgreSQL) for structured data, potentially NoSQL for flexibility.</li>
-                                <li>**Cloud Hosting:** Scalable cloud solutions (AWS, GCP, or Azure).</li>
-                                <li>**Key Integrations:** Secure Payment Gateway, Mapping/GIS for addresses, Email/SMS notifications, Analytics.</li>
-                            </ul>
-                            <p class="text-xs text-gray-500 mt-4">Based on Section 7 of the "Technical Requirements: Home Services Platform (v1.0)" document.</p>
+                            <h3 class="text-2xl font-semibold mb-6 text-center accent-blue">Provider Login</h3>
+                            <form id="providerLoginForm" class="space-y-6">
+                                <div>
+                                    <label for="providerEmail" class="block text-sm font-medium text-gray-700">Email Address</label>
+                                    <input type="email" id="providerEmail" name="providerEmail" required class="mt-1" placeholder="you@yourcompany.com">
+                                </div>
+                                <div>
+                                    <label for="providerPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                                    <input type="password" id="providerPassword" name="providerPassword" required class="mt-1" placeholder="••••••••">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <a href="#" class="text-sm accent-blue hover:underline">Forgot password?</a>
+                                </div>
+                                <button type="submit" class="button button-primary w-full text-lg">Login to Provider Portal</button>
+                                <p class="text-sm text-center text-gray-500 mt-4">
+                                    Don't have an account? <a href="#provider-signup" class="font-medium accent-green hover:underline">Sign up here</a>
+                                </p>
+                            </form>
                         </div>
-                        <div class="card">
-                            <h3 class="text-xl font-semibold mb-4 accent-blue">Future Considerations (Post-MVP)</h3>
-                            <ul class="list-disc list-inside text-sm space-y-2 text-gray-600">
-                                <li>Native Mobile Applications (iOS & Android) for enhanced user experience.</li>
-                                <li>Advanced Provider Analytics and Business Management Tools.</li>
-                                <li>Customer Subscription Models for recurring services.</li>
-                                <li>AI-Powered Service Recommendations and Smart Quoting.</li>
-                                <li>Strategic Expansion to New Service Verticals and Geographic Areas.</li>
-                            </ul>
-                             <p class="text-xs text-gray-500 mt-4">Based on Section 8 of the "Technical Requirements: Home Services Platform (v1.0)" document.</p>
+
+                        <div class="space-y-8">
+                             <h3 class="text-2xl font-semibold mb-6 text-center text-gray-800">Our Partnership Plans</h3>
+                            <div class="pricing-tier-card card">
+                                <h4 class="text-xl font-semibold mb-2 accent-green">Basic Connect</h4>
+                                <p class="text-3xl font-bold mb-1">$29<span class="text-sm font-normal text-gray-500">/month</span></p>
+                                <p class="text-sm text-gray-600 mb-4">Get started and receive leads in your service area.</p>
+                                <ul class="space-y-2 text-sm text-gray-700 mb-6">
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Profile listing</li>
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Up to 10 leads per month</li>
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Basic support</li>
+                                </ul>
+                                <button class="button button-primary w-full opacity-70 cursor-not-allowed" disabled>Choose Basic (Demo)</button>
+                            </div>
+
+                            <div class="pricing-tier-card card recommended">
+                                <div class="absolute top-0 right-0 bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg rounded-tr-lg">RECOMMENDED</div>
+                                <h4 class="text-xl font-semibold mb-2 accent-green">Pro Growth</h4>
+                                <p class="text-3xl font-bold mb-1">$59<span class="text-sm font-normal text-gray-500">/month</span></p>
+                                <p class="text-sm text-gray-600 mb-4">Maximize your visibility and job opportunities.</p>
+                                <ul class="space-y-2 text-sm text-gray-700 mb-6">
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Enhanced profile listing</li>
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Up to 30 leads per month</li>
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Priority support</li>
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Featured placement in search results</li>
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Basic analytics</li>
+                                </ul>
+                                <button class="button button-primary w-full">Choose Pro (Demo)</button>
+                            </div>
+
+                            <div class="pricing-tier-card card">
+                                <h4 class="text-xl font-semibold mb-2 accent-green">Elite Partner</h4>
+                                <p class="text-3xl font-bold mb-1">$99<span class="text-sm font-normal text-gray-500">/month</span></p>
+                                <p class="text-sm text-gray-600 mb-4">For established businesses aiming for market leadership.</p>
+                                <ul class="space-y-2 text-sm text-gray-700 mb-6">
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Premium profile with video option</li>
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Unlimited leads (fair use)</li>
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Dedicated account manager</li>
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Top placement & advertising boosts</li>
+                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Advanced analytics & reporting</li>
+                                </ul>
+                                <button class="button button-primary w-full opacity-70 cursor-not-allowed" disabled>Choose Elite (Demo)</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -391,7 +448,7 @@
             mowingPlus: {
                 description: "Plus Package includes basic mowing, edging, blowing, plus light trimming of bushes/shrubs immediately adjacent to the house foundation (up to 6ft height).",
                 prices: { small: "$65-$85", medium: "$80-$105", large: "$100-$130", xlarge: "$125-$160" },
-                name: "Landscaping (Mowing Plus)" // Updated name for category link
+                name: "Landscaping (Mowing Plus)"
             },
             fertilization: {
                 description: "Application of premium, season-appropriate fertilizer to promote healthy lawn growth and vibrant color. Tailored to Dallas, TX climate and soil conditions.",
@@ -401,17 +458,76 @@
             weeding: {
                 description: "Manual weeding of designated garden beds (up to specified square footage). Includes removal of common weeds. Does not include chemical treatments unless specified.",
                 prices: { small: "$40-$55 (per hour/small bed)", medium: "$50-$70 (per hour/medium bed)", large: "$60-$85 (per hour/large bed)", xlarge: "$70-$95 (per hour/xl bed)" },
-                name: "Weed Control (Garden Bed Weeding)" // Updated name
+                name: "Weed Control (Garden Bed Weeding)"
             }
         };
+
+        const mockProviders = [
+            {
+                id: 1,
+                name: "GreenThumb Experts",
+                rating: 4.8,
+                reviewsCount: 150,
+                imageUrl: "https://placehold.co/600x400/A3E6B4/333333?text=GreenThumb+Pros",
+                servicesOffered: ["mowing", "fertilization", "weeding", "mowingPlus"],
+                basePriceModifier: 1.0, 
+                bio: "Your local experts for a lush, healthy lawn. Serving Dallas for 10+ years with dedication and eco-friendly options.",
+                availability: "Next available: Tomorrow"
+            },
+            {
+                id: 2,
+                name: "Precision Lawn Care Dallas",
+                rating: 4.5,
+                reviewsCount: 85,
+                imageUrl: "https://placehold.co/600x400/9AE6B4/333333?text=Precision+Care",
+                servicesOffered: ["mowing", "mowingPlus"],
+                basePriceModifier: 1.1, 
+                bio: "Meticulous mowing and edging. We treat every lawn like our own, ensuring picture-perfect results every time.",
+                availability: "Available from: Next Monday"
+            },
+            {
+                id: 3,
+                name: "Budget Cuts Lawn Service",
+                rating: 4.2,
+                reviewsCount: 210,
+                imageUrl: "https://placehold.co/600x400/B3E6B4/333333?text=Budget+Cuts",
+                servicesOffered: ["mowing"],
+                basePriceModifier: 0.9, 
+                bio: "Affordable and reliable lawn mowing services for the Dallas area. Quality work that doesn't break the bank.",
+                availability: "Next available: In 2 days"
+            },
+            {
+                id: 4,
+                name: "Yard Masters Inc.",
+                rating: 4.9,
+                reviewsCount: 300,
+                imageUrl: "https://placehold.co/600x400/87D3B4/333333?text=Yard+Masters",
+                servicesOffered: ["mowing", "mowingPlus", "fertilization", "weeding"],
+                basePriceModifier: 1.15,
+                bio: "Premium lawn care and landscaping solutions. We transform yards into outdoor masterpieces.",
+                availability: "Book 1 week in advance"
+            },
+            {
+                id: 5,
+                name: "Dallas Green Team",
+                rating: 4.6,
+                reviewsCount: 120,
+                imageUrl: "https://placehold.co/600x400/C1E8D4/333333?text=Green+Team",
+                servicesOffered: ["mowing", "fertilization"],
+                basePriceModifier: 0.95,
+                bio: "Eco-conscious lawn fertilization and maintenance. We use sustainable practices for a healthier planet.",
+                availability: "Next available: Wednesday"
+            }
+        ];
 
         // --- View Management ---
         const views = document.querySelectorAll('.view');
         const navLinks = document.querySelectorAll('.nav-link');
         const siteTitleLink = document.querySelector('.site-title');
-        let currentZipCode = "Dallas, TX"; // Default
-        let currentServiceSelection = null;
-
+        let currentZipCode = "Dallas, TX"; 
+        let currentServiceSelection = "all"; 
+        let currentYardSizeSelection = "any";
+        let currentSortBy = "rating";
 
         function setActiveView(viewId, data = {}) {
             views.forEach(view => {
@@ -422,18 +538,30 @@
                 link.classList.toggle('active-nav', link.getAttribute('href') === `#${viewId.replace('View','')}`);
             });
 
-            if (viewId === 'blueprintView') {
-                if (data.zip && blueprintZipDisplay) {
+            if (viewId === 'exploreServicesView') {
+                const exploreZipDisplay = document.getElementById('exploreServicesZipDisplay');
+                if (data.zip && exploreZipDisplay) {
                     currentZipCode = data.zip;
-                    blueprintZipDisplay.textContent = `Zip Code ${currentZipCode}`;
-                } else if (blueprintZipDisplay) {
-                     blueprintZipDisplay.textContent = `Zip Code ${currentZipCode}`; // Use last known or default
+                    exploreZipDisplay.textContent = `Zip Code ${currentZipCode}`;
+                } else if (exploreZipDisplay) {
+                    exploreZipDisplay.textContent = `Zip Code ${currentZipCode}`; 
                 }
-                if (data.service && blueprintServiceTypeSelect) {
+                
+                const filterServiceType = document.getElementById('filterServiceType');
+                if (data.service && filterServiceType) {
                     currentServiceSelection = data.service;
-                    blueprintServiceTypeSelect.value = currentServiceSelection;
+                    filterServiceType.value = currentServiceSelection;
+                } else if (filterServiceType) {
+                    filterServiceType.value = currentServiceSelection; 
                 }
-                updateBlueprintServiceDetails(); // Always update details when blueprint view is shown
+                
+                const filterYardSize = document.getElementById('filterYardSize');
+                if(filterYardSize) filterYardSize.value = currentYardSizeSelection;
+
+                const filterSortBy = document.getElementById('filterSortBy');
+                if(filterSortBy) filterSortBy.value = currentSortBy;
+
+                renderProviders();
             }
             window.scrollTo(0, 0);
         }
@@ -443,7 +571,7 @@
                 e.preventDefault();
                 const targetViewId = e.target.getAttribute('href').substring(1) + "View";
                 setActiveView(targetViewId);
-                history.pushState({view: targetViewId, zip: currentZipCode, service: currentServiceSelection}, "", e.target.getAttribute('href'));
+                history.pushState({view: targetViewId, zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", e.target.getAttribute('href'));
             });
         });
 
@@ -458,6 +586,10 @@
         window.addEventListener('popstate', (event) => {
             const targetView = (event.state && event.state.view) ? event.state.view : 'homeView';
             const data = event.state || {};
+            if(data.zip) currentZipCode = data.zip;
+            if(data.service) currentServiceSelection = data.service;
+            if(data.yardSize) currentYardSizeSelection = data.yardSize;
+            if(data.sortBy) currentSortBy = data.sortBy;
             setActiveView(targetView, data);
         });
 
@@ -465,7 +597,6 @@
         const zipCodeForm = document.getElementById('zipCodeForm');
         const zipCodeInput = document.getElementById('zipCodeInput');
         const zipError = document.getElementById('zipError');
-        const blueprintZipDisplay = document.getElementById('blueprintZipDisplay');
         const categoryLinks = document.querySelectorAll('.category-link');
 
         if (zipCodeForm) {
@@ -474,17 +605,14 @@
                 const zip = zipCodeInput.value.trim();
                 zipError.textContent = ''; 
                 if (/^\d{5}$/.test(zip)) {
-                    // REQ-HOME-005: Simulate checking if zip is in service area 
-                    // For demo, any 5-digit zip will proceed. A real app would validate against a service area list.
-                    // Example: if (zip !== "75201" && zip !== "75032") { zipError.textContent = "Sorry, we're not yet serving your area."; return; }
                     currentZipCode = zip;
-                    const preselectedService = this.dataset.preselectedService;
-                    delete this.dataset.preselectedService; // Clear after use
+                    const preselectedService = this.dataset.preselectedService || "all";
+                    delete this.dataset.preselectedService;
 
-                    setActiveView('blueprintView', { zip: currentZipCode, service: preselectedService });
-                    history.pushState({view: 'blueprintView', zip: currentZipCode, service: preselectedService}, "", "#blueprint");
+                    setActiveView('exploreServicesView', { zip: currentZipCode, service: preselectedService });
+                    history.pushState({view: 'exploreServicesView', zip: currentZipCode, service: preselectedService, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", "#exploreServices");
                 } else {
-                    zipError.textContent = 'Please enter a valid 5-digit Zip Code.'; // REQ-HOME-004
+                    zipError.textContent = 'Please enter a valid 5-digit Zip Code.';
                 }
             });
         }
@@ -493,100 +621,186 @@
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const service = this.dataset.service;
-                currentServiceSelection = service; // Store for potential use
+                currentServiceSelection = service;
                 const currentZip = zipCodeInput.value.trim();
 
-                if (currentZip && /^\d{5}$/.test(currentZip)) { // REQ-HOME-006 (using entered zip)
+                if (currentZip && /^\d{5}$/.test(currentZip)) {
                     currentZipCode = currentZip;
-                    setActiveView('blueprintView', { zip: currentZipCode, service: currentServiceSelection });
-                    history.pushState({view: 'blueprintView', zip: currentZipCode, service: currentServiceSelection}, "", "#blueprint");
-                } else { // REQ-HOME-006 (prompt for zip)
+                    setActiveView('exploreServicesView', { zip: currentZipCode, service: currentServiceSelection });
+                    history.pushState({view: 'exploreServicesView', zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", "#exploreServices");
+                } else { 
                     zipCodeInput.focus();
                     zipError.textContent = 'Please enter your Zip Code to see services.';
-                    if(zipCodeForm) zipCodeForm.dataset.preselectedService = service; // Store for form submit
+                    if(zipCodeForm) zipCodeForm.dataset.preselectedService = service;
                 }
             });
         });
 
-        // --- Blueprint Specific JS (prefixed with 'Blueprint' to avoid conflicts) ---
-        const blueprintServiceTypeSelect = document.getElementById('serviceTypeBlueprint');
-        const blueprintYardSizeSelect = document.getElementById('yardSizeBlueprint');
-        const blueprintServiceDescriptionEl = document.getElementById('serviceDescriptionBlueprint');
-        const blueprintPriceRangeEl = document.getElementById('priceRangeBlueprint');
-        const blueprintProceedToBookBtn = document.getElementById('proceedToBookBtnBlueprint');
-        const blueprintBookingDemoSection = document.getElementById('bookingDemoBlueprint');
+        // --- Explore Services View Specific JS ---
+        const filterServiceTypeSelect = document.getElementById('filterServiceType');
+        const filterYardSizeSelect = document.getElementById('filterYardSize');
+        const filterSortBySelect = document.getElementById('filterSortBy');
+        const providerListingsContainer = document.getElementById('providerListingsContainer');
+        const noProvidersMessage = document.getElementById('noProvidersMessage');
         
-        const blueprintBookedServiceDisplay = document.getElementById('bookedServiceDisplayBlueprint');
-        const blueprintBookedYardSizeDisplay = document.getElementById('bookedYardSizeDisplayBlueprint');
-        const blueprintBookedPriceDisplay = document.getElementById('bookedPriceDisplayBlueprint');
-        const blueprintShowBookingConfirmationBtn = document.getElementById('showBookingConfirmationBtnBlueprint');
-        const blueprintBookingConfirmationDiv = document.getElementById('bookingConfirmationBlueprint');
+        const bookingDemoExploreSection = document.getElementById('bookingDemoExplore');
+        const bookedServiceDisplayExplore = document.getElementById('bookedServiceDisplayExplore');
+        const bookedYardSizeDisplayExplore = document.getElementById('bookedYardSizeDisplayExplore');
+        const bookedPriceDisplayExplore = document.getElementById('bookedPriceDisplayExplore');
+        const showBookingConfirmationBtnExplore = document.getElementById('showBookingConfirmationBtnExplore');
+        const bookingConfirmationExploreDiv = document.getElementById('bookingConfirmationExplore');
+        const confirmProviderNameEl = document.getElementById('confirmProviderName');
+        const bookingProviderNameEl = document.getElementById('bookingProviderName');
 
-        function updateBlueprintServiceDetails() {
-            if (!blueprintServiceTypeSelect || !blueprintYardSizeSelect || !blueprintServiceDescriptionEl || !blueprintPriceRangeEl) return;
+        function calculateProviderPriceRange(provider, serviceKey, yardSizeKey) {
+            if (!serviceData[serviceKey]) return "Service N/A";
+            const service = serviceData[serviceKey];
+            let priceString = service.prices[yardSizeKey] || "N/A for this size";
 
-            const selectedServiceKey = blueprintServiceTypeSelect.value;
-            const selectedYardSizeKey = blueprintYardSizeSelect.value;
+            if (priceString !== "N/A for this size" && priceString.includes('-')) {
+                const parts = priceString.replace(/\$/g, '').split('-');
+                const minPrice = parseFloat(parts[0]) * provider.basePriceModifier;
+                const maxPrice = parseFloat(parts[1]) * provider.basePriceModifier;
+                return `$${minPrice.toFixed(0)}-$${maxPrice.toFixed(0)}`;
+            } else if (priceString !== "N/A for this size") {
+                 const singlePrice = parseFloat(priceString.replace(/\$/g, '').split(' ')[0]) * provider.basePriceModifier;
+                 return `$${singlePrice.toFixed(0)} ${priceString.split(' ').slice(1).join(' ')}`;
+            }
+            return priceString;
+        }
 
-            if (serviceData[selectedServiceKey]) {
-                const service = serviceData[selectedServiceKey];
-                blueprintServiceDescriptionEl.textContent = service.description;
-                blueprintPriceRangeEl.textContent = service.prices[selectedYardSizeKey] || "$--";
+        function renderProviders() {
+            if (!providerListingsContainer) return;
+            providerListingsContainer.innerHTML = ''; 
+
+            let filteredProviders = mockProviders.filter(provider => {
+                if (currentServiceSelection === 'all') return true;
+                return provider.servicesOffered.includes(currentServiceSelection);
+            });
+
+            if (currentSortBy === 'rating') {
+                filteredProviders.sort((a, b) => b.rating - a.rating);
+            } else if (currentSortBy === 'reviews') {
+                filteredProviders.sort((a, b) => b.reviewsCount - a.reviewsCount);
+            } else if (currentSortBy === 'name_asc') {
+                filteredProviders.sort((a, b) => a.name.localeCompare(b.name));
+            }
+
+            if (filteredProviders.length === 0) {
+                if(noProvidersMessage) noProvidersMessage.classList.remove('hidden');
             } else {
-                blueprintServiceDescriptionEl.textContent = "Select a service and yard size to see details.";
-                blueprintPriceRangeEl.textContent = "$--";
+                 if(noProvidersMessage) noProvidersMessage.classList.add('hidden');
+            }
+
+            filteredProviders.forEach(provider => {
+                const listItem = document.createElement('div');
+                listItem.className = 'provider-list-item p-6 flex flex-col sm:flex-row gap-6 items-start'; 
+                
+                const effectiveServiceKey = currentServiceSelection === 'all' ? provider.servicesOffered[0] : currentServiceSelection;
+                const effectiveYardSizeKey = currentYardSizeSelection === 'any' ? 'medium' : currentYardSizeSelection;
+                const displayPriceRange = calculateProviderPriceRange(provider, effectiveServiceKey, effectiveYardSizeKey);
+
+                let specialtiesHTML = provider.servicesOffered.map(serviceKey => {
+                    const serviceDetail = serviceData[serviceKey];
+                    return `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full mr-1 mb-1 inline-block">${serviceDetail ? serviceDetail.name.split('(')[0].trim() : serviceKey}</span>`;
+                }).join('');
+
+                listItem.innerHTML = `
+                    <img src="${provider.imageUrl}" alt="${provider.name}" class="w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/400x400/E2E8F0/4A5568?text=Pro+Image';">
+                    <div class="flex-grow">
+                        <h4 class="text-2xl font-semibold mb-1 text-gray-800">${provider.name}</h4>
+                        <div class="star-rating text-sm text-gray-600 mb-2 flex items-center">
+                            <span>${'★'.repeat(Math.floor(provider.rating))}${'☆'.repeat(5 - Math.floor(provider.rating))}</span>
+                            <span class="ml-2">${provider.rating.toFixed(1)} (${provider.reviewsCount} reviews)</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">${provider.bio}</p>
+                        <div class="mb-3">
+                            <strong class="text-xs text-gray-500 uppercase">Specialties:</strong>
+                            <div class="mt-1">${specialtiesHTML}</div>
+                        </div>
+                        <div class="mb-3">
+                             <strong class="text-xs text-gray-500 uppercase">Availability:</strong>
+                             <p class="text-sm text-gray-700">${provider.availability}</p>
+                        </div>
+                         <div class="mb-4">
+                             <strong class="text-xs text-gray-500 uppercase">Est. Price for Selected Service:</strong>
+                             <p class="text-xl font-bold accent-green">${displayPriceRange}</p>
+                             <p class="text-xs text-gray-500">(for ${serviceData[effectiveServiceKey] ? serviceData[effectiveServiceKey].name : 'selected service'} / ${effectiveYardSizeKey} yard)</p>
+                        </div>
+                        <button data-provider-id="${provider.id}" data-service-key="${effectiveServiceKey}" data-yard-size-key="${effectiveYardSizeKey}" data-price-string="${displayPriceRange}" class="proceed-to-book-provider-btn button button-primary w-full sm:w-auto text-sm">View Details & Book</button>
+                    </div>
+                `;
+                providerListingsContainer.appendChild(listItem);
+            });
+
+            document.querySelectorAll('.proceed-to-book-provider-btn').forEach(button => {
+                button.addEventListener('click', handleProceedToBookFromProvider);
+            });
+        }
+        
+        function handleProceedToBookFromProvider(event) {
+            const button = event.currentTarget; // Use currentTarget
+            const providerId = parseInt(button.dataset.providerId);
+            const serviceKey = button.dataset.serviceKey;
+            const yardSizeKey = button.dataset.yardSizeKey;
+            const priceString = button.dataset.priceString;
+
+            const provider = mockProviders.find(p => p.id === providerId);
+            const service = serviceData[serviceKey];
+            const yardSizeText = Array.from(document.getElementById('filterYardSize').options).find(opt => opt.value === yardSizeKey)?.text || yardSizeKey;
+
+            if (provider && service && bookingDemoExploreSection) {
+                if(confirmProviderNameEl) confirmProviderNameEl.textContent = provider.name;
+                if(bookingProviderNameEl) bookingProviderNameEl.textContent = provider.name;
+                if(bookedServiceDisplayExplore) bookedServiceDisplayExplore.textContent = service.name;
+                if(bookedYardSizeDisplayExplore) bookedYardSizeDisplayExplore.textContent = yardSizeText;
+                if(bookedPriceDisplayExplore) bookedPriceDisplayExplore.textContent = priceString;
+                
+                bookingDemoExploreSection.classList.remove('hidden');
+                bookingDemoExploreSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if(bookingConfirmationExploreDiv) bookingConfirmationExploreDiv.classList.add('hidden');
             }
         }
 
-        if (blueprintServiceTypeSelect) blueprintServiceTypeSelect.addEventListener('change', updateBlueprintServiceDetails);
-        if (blueprintYardSizeSelect) blueprintYardSizeSelect.addEventListener('change', updateBlueprintServiceDetails);
-
-        if (blueprintProceedToBookBtn) {
-            blueprintProceedToBookBtn.addEventListener('click', () => {
-                if (!blueprintServiceTypeSelect || !blueprintYardSizeSelect || !blueprintBookedServiceDisplay || !blueprintBookedYardSizeDisplay || !blueprintBookedPriceDisplay || !blueprintBookingDemoSection) return;
-
-                const selectedServiceKey = blueprintServiceTypeSelect.value;
-                const selectedYardSizeKey = blueprintYardSizeSelect.value;
-                const service = serviceData[selectedServiceKey];
-                const yardSizeText = blueprintYardSizeSelect.options[blueprintYardSizeSelect.selectedIndex].text;
-
-                if (service) {
-                    blueprintBookedServiceDisplay.textContent = service.name;
-                    blueprintBookedYardSizeDisplay.textContent = yardSizeText;
-                    blueprintBookedPriceDisplay.textContent = service.prices[selectedYardSizeKey] || "$--";
-                    blueprintBookingDemoSection.classList.remove('hidden');
-                    blueprintBookingDemoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    if(blueprintBookingConfirmationDiv) blueprintBookingConfirmationDiv.classList.add('hidden');
-                } else {
-                    alert("Please select a service and yard size first to see booking details.");
-                }
+        if (filterServiceTypeSelect) filterServiceTypeSelect.addEventListener('change', (e) => { currentServiceSelection = e.target.value; renderProviders(); });
+        if (filterYardSizeSelect) filterYardSizeSelect.addEventListener('change', (e) => { currentYardSizeSelection = e.target.value; renderProviders(); });
+        if (filterSortBySelect) filterSortBySelect.addEventListener('change', (e) => { currentSortBy = e.target.value; renderProviders(); });
+        
+        if (showBookingConfirmationBtnExplore) {
+            showBookingConfirmationBtnExplore.addEventListener('click', () => {
+                 if(bookingConfirmationExploreDiv) bookingConfirmationExploreDiv.classList.remove('hidden');
             });
         }
-
-        if (blueprintShowBookingConfirmationBtn) {
-            blueprintShowBookingConfirmationBtn.addEventListener('click', () => {
-                 if(blueprintBookingConfirmationDiv) blueprintBookingConfirmationDiv.classList.remove('hidden');
+        
+        const providerLoginForm = document.getElementById('providerLoginForm');
+        if (providerLoginForm) {
+            providerLoginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Mock login action
+                alert('Provider login attempt (demo). In a real app, this would authenticate.');
             });
         }
         
         document.getElementById('currentYear').textContent = new Date().getFullYear();
 
-        // --- Initial View Setup based on Hash or Default to Home ---
         document.addEventListener('DOMContentLoaded', () => {
-            const initialHash = window.location.hash;
-            let initialView = 'homeView';
+            const initialHash = window.location.hash.substring(1); 
+            let initialViewId = 'homeView';
             let initialData = {};
 
-            if (initialHash === '#blueprint') {
-                initialView = 'blueprintView';
-                // Attempt to restore state if available (e.g., from a direct link or refresh)
-                // This is a simple example; a real app might use query params or localStorage
+            if (initialHash === 'exploreServices') {
+                initialViewId = 'exploreServicesView';
                 if (history.state && history.state.zip) initialData.zip = history.state.zip;
                 if (history.state && history.state.service) initialData.service = history.state.service;
-            } else {
+                if (history.state && history.state.yardSize) currentYardSizeSelection = history.state.yardSize;
+                if (history.state && history.state.sortBy) currentSortBy = history.state.sortBy;
+            } else if (initialHash === 'providers') {
+                initialViewId = 'providersView';
+            }
+            else {
                  history.replaceState({view: 'homeView'}, "", "#home");
             }
-            setActiveView(initialView, initialData);
+            setActiveView(initialViewId, initialData);
         });
 
     </script>
