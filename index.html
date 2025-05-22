@@ -129,6 +129,8 @@
             justify-content: center;
             color: #4A5568;
             font-size: 0.875rem;
+            text-align: center;
+            line-height: 1.2;
         }
     </style>
 </head>
@@ -478,7 +480,7 @@
                 name: "GreenThumb Experts",
                 rating: 4.8,
                 reviewsCount: 150,
-                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading...",
+                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading+Image...",
                 imagePrompt: "Photo of a lush, perfectly manicured green residential lawn on a sunny day, showcasing healthy grass and neat edging. Focus on the vibrant green color and overall pristine look. Bright, natural lighting, high quality.",
                 servicesOffered: ["mowing", "fertilization", "weeding", "mowingPlus"],
                 basePriceModifier: 1.0, 
@@ -490,7 +492,7 @@
                 name: "Precision Lawn Care Dallas",
                 rating: 4.5,
                 reviewsCount: 85,
-                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading...",
+                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading+Image...",
                 imagePrompt: "Action shot of a professional lawn care worker in uniform carefully mowing a lawn with a modern lawnmower, creating clean stripes on the grass. Sunny day, well-maintained suburban yard in the background, high quality photo.",
                 servicesOffered: ["mowing", "mowingPlus"],
                 basePriceModifier: 1.1, 
@@ -502,7 +504,7 @@
                 name: "Budget Cuts Lawn Service",
                 rating: 4.2,
                 reviewsCount: 210,
-                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading...",
+                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading+Image...",
                 imagePrompt: "Friendly-looking lawn care professional smiling, standing next to a clean work truck with basic lawn equipment visible (mower, trimmer). Clear, bright day, high quality photo.",
                 servicesOffered: ["mowing"],
                 basePriceModifier: 0.9, 
@@ -514,7 +516,7 @@
                 name: "Yard Masters Inc.",
                 rating: 4.9,
                 reviewsCount: 300,
-                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading...",
+                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading+Image...",
                 imagePrompt: "Photo of a beautifully landscaped residential front yard featuring colorful flower beds, neatly trimmed shrubs, and a healthy green lawn. High-quality landscaping work. Bright daylight, high quality photo.",
                 servicesOffered: ["mowing", "mowingPlus", "fertilization", "weeding"],
                 basePriceModifier: 1.15,
@@ -526,7 +528,7 @@
                 name: "Dallas Green Team",
                 rating: 4.6,
                 reviewsCount: 120,
-                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading...",
+                imageUrl: "https://placehold.co/400x400/E2E8F0/4A5568?text=Loading+Image...",
                 imagePrompt: "Close-up shot of a lawn care worker applying eco-friendly granular fertilizer to a green lawn. Focus on the application process and the healthy grass. Natural, outdoor lighting, high quality photo.",
                 servicesOffered: ["mowing", "fertilization"],
                 basePriceModifier: 0.95,
@@ -538,9 +540,10 @@
         // --- Image Generation Function ---
         async function generateImageForProvider(provider) {
             const payload = { instances: [{ prompt: provider.imagePrompt }], parameters: { "sampleCount": 1 } };
-            const apiKey = ""; // API key will be injected by the environment
+            const apiKey = ""; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-            
+            const errorPlaceholderUrl = `https://placehold.co/400x400/FFCDD2/B71C1C?text=Image+Gen+Error`;
+
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
@@ -548,34 +551,53 @@
                     body: JSON.stringify(payload)
                 });
                 if (!response.ok) {
-                    console.error(`Image generation failed for ${provider.name}: ${response.statusText}`);
-                    return provider.imageUrl; // Return placeholder on error
+                    let errorData = null;
+                    try { errorData = await response.json(); } catch (e) { /* ignore */ }
+                    console.error(`Image generation API error for ${provider.name}: ${response.status} ${response.statusText}`, errorData || '(No JSON error body)');
+                    return errorPlaceholderUrl; 
                 }
                 const result = await response.json();
                 if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
                     return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
                 } else {
-                    console.error(`Unexpected response structure for ${provider.name}:`, result);
-                    return provider.imageUrl; // Return placeholder
+                    console.error(`Unexpected API response structure for ${provider.name}:`, result);
+                    return errorPlaceholderUrl; 
                 }
             } catch (error) {
-                console.error(`Error generating image for ${provider.name}:`, error);
-                return provider.imageUrl; // Return placeholder on network error
+                console.error(`Network or other error generating image for ${provider.name}:`, error);
+                return errorPlaceholderUrl; 
             }
         }
 
         async function loadProviderImages() {
-            const imagePromises = mockProviders.map(async (provider) => {
+            const imageUpdatePromises = mockProviders.map(async (provider) => {
                 const generatedUrl = await generateImageForProvider(provider);
-                provider.imageUrl = generatedUrl; // Update the provider object
-                return provider; // Return the updated provider
+                provider.imageUrl = generatedUrl; 
+                // Update the specific image container if it's already rendered
+                const imgContainer = document.getElementById(`img-provider-${provider.id}`);
+                if (imgContainer) {
+                    if (generatedUrl && !generatedUrl.startsWith('https://placehold.co')) {
+                        imgContainer.innerHTML = `<img src="${generatedUrl}" alt="${provider.name}" class="w-full h-full object-cover rounded-lg">`;
+                        imgContainer.classList.remove('provider-image-placeholder');
+                        imgContainer.style.backgroundColor = 'transparent';
+                        imgContainer.style.color = 'inherit';
+                    } else { // Handle error placeholder specifically
+                        imgContainer.textContent = 'Image Gen Error';
+                        imgContainer.classList.add('provider-image-placeholder');
+                        imgContainer.style.backgroundColor = '#FFCDD2'; 
+                        imgContainer.style.color = '#B71C1C';
+                    }
+                }
+                return provider;
             });
         
-            await Promise.allSettled(imagePromises);
-            // After all images attempted, re-render.
-            // This ensures that even if some images fail, the list still renders with placeholders for those.
+            await Promise.allSettled(imageUpdatePromises);
+            // If the view is active but was rendered before images loaded, a full re-render might be needed
+            // or ensure individual updates are sufficient. For now, individual updates are attempted.
             if (document.getElementById('exploreServicesView').classList.contains('active')) {
-                 renderProviders();
+                 // If renderProviders was called with initial placeholders, this ensures they get updated
+                 // if some images resolve after initial render.
+                 renderProviders(); 
             }
         }
 
@@ -622,13 +644,10 @@
                 const filterSortBy = document.getElementById('filterSortBy');
                 if(filterSortBy) filterSortBy.value = currentSortBy;
                 
-                renderProviders(); // Render with placeholders first
+                renderProviders(); 
                 if (!imagesLoaded) {
                     loadProviderImages().then(() => {
                         imagesLoaded = true; 
-                        // Re-render might not be strictly necessary if individual images are updated
-                        // but can be a failsafe if direct DOM manipulation of images is complex.
-                        // For this version, loadProviderImages updates mockProviders array and then renderProviders uses it.
                     });
                 }
 
@@ -765,7 +784,7 @@
             filteredProviders.forEach(provider => {
                 const listItem = document.createElement('div');
                 listItem.className = 'provider-list-item p-6 flex flex-col sm:flex-row gap-6 items-start'; 
-                listItem.id = `provider-${provider.id}`;
+                listItem.id = `provider-item-${provider.id}`;
                 
                 const effectiveServiceKey = currentServiceSelection === 'all' ? provider.servicesOffered[0] : currentServiceSelection;
                 const effectiveYardSizeKey = currentYardSizeSelection === 'any' ? 'medium' : currentYardSizeSelection;
@@ -776,8 +795,13 @@
                     return `<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full mr-1 mb-1 inline-block">${serviceDetail ? serviceDetail.name.split('(')[0].trim() : serviceKey}</span>`;
                 }).join('');
                 
-                // Use a placeholder div for the image that will be updated
-                const imageHTML = `<div id="img-provider-${provider.id}" class="provider-image-placeholder w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0">Loading Image...</div>`;
+                const imgContainerId = `img-provider-${provider.id}`;
+                let imageHTML = `<div id="${imgContainerId}" class="provider-image-placeholder w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0">Loading Image...</div>`;
+                if (provider.imageUrl && !provider.imageUrl.startsWith('https://placehold.co') && !provider.imageUrl.includes('Image+Gen+Error')) {
+                     imageHTML = `<img src="${provider.imageUrl}" alt="${provider.name}" class="w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0">`;
+                } else if (provider.imageUrl && provider.imageUrl.includes('Image+Gen+Error')) {
+                     imageHTML = `<div id="${imgContainerId}" class="provider-image-placeholder w-full sm:w-40 h-40 object-cover rounded-lg shadow-md flex-shrink-0" style="background-color: #FFCDD2; color: #B71C1C;">Image Gen Error</div>`;
+                }
 
 
                 listItem.innerHTML = `
@@ -806,16 +830,6 @@
                     </div>
                 `;
                 providerListingsContainer.appendChild(listItem);
-                // After appending, update the image if it's already loaded
-                const imgContainer = document.getElementById(`img-provider-${provider.id}`);
-                if (provider.imageUrl && !provider.imageUrl.startsWith('https://placehold.co')) {
-                    imgContainer.innerHTML = `<img src="${provider.imageUrl}" alt="${provider.name}" class="w-full h-full object-cover rounded-lg">`;
-                    imgContainer.classList.remove('provider-image-placeholder');
-                } else if (provider.imageUrl.startsWith('https://placehold.co') && provider.imageUrl.includes('Error')) {
-                     imgContainer.textContent = 'Image Error';
-                }
-
-
             });
 
             document.querySelectorAll('.proceed-to-book-provider-btn').forEach(button => {
