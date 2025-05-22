@@ -11,7 +11,7 @@
         - Homepage: Zip Code input. Goal: Entry to service exploration. Interaction: Zip Code input -> Explore Services view. Library/Method: Vanilla JS.
         - Explore Services - Provider Listing: Filters. Dynamic list of Provider items. Goal: Expedia-like browsing/comparison. Viz/Presentation: HTML/Tailwind list items. Provider images are descriptive placeholders. Interaction: Filters update list. Clicking provider item shows their specific price & populates booking. Library/Method: Vanilla JS.
         - Simulated Booking (Explore Services): Mock form. Goal: Show PII collection. Interaction: Triggered by provider selection. Library/Method: Vanilla JS.
-        - For Providers Page: Mock Login form. Pricing Tiers table/cards. Goal: Show provider-facing aspects. Viz/Presentation: HTML/Tailwind. Interaction: Static display. Library/Method: HTML/Tailwind.
+        - For Providers Page: Mock Login form. Detailed Pricing Tiers (from LocalProGo_ProviderTiers_v2) displayed as cards. Goal: Show provider-facing aspects & value proposition. Viz/Presentation: HTML/Tailwind. Interaction: Static display. Library/Method: HTML/Tailwind.
         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
     -->
     <style>
@@ -116,11 +116,30 @@
         }
         .pricing-tier-card {
             border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            height: 100%; 
+        }
+        .pricing-tier-card .features-list {
+            flex-grow: 1; 
         }
         .pricing-tier-card.recommended {
             border-color: #28a745;
             border-width: 2px;
             box-shadow: 0 0 15px rgba(40, 167, 69, 0.2);
+            position: relative; 
+        }
+         .recommended-badge {
+            position: absolute;
+            top: -1px; 
+            right: -1px; 
+            background-color: #28a745;
+            color: white;
+            font-size: 0.75rem; 
+            font-weight: 600;
+            padding: 0.25rem 0.75rem; 
+            border-top-right-radius: 10px; 
+            border-bottom-left-radius: 10px;
         }
         .provider-image-placeholder {
             background-color: #e2e8f0;
@@ -355,7 +374,7 @@
         </div>
 
         <div id="providersView" class="view">
-            <section class="section bg-gray-50">
+            <section class="section bg-white">
                 <div class="container mx-auto">
                     <div class="text-center mb-16">
                         <h2 class="text-4xl font-bold mb-4 text-gray-800">Join LocalProGo as a Service Professional</h2>
@@ -364,8 +383,8 @@
                         </p>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-12 items-start">
-                        <div class="card">
+                    <div class="grid lg:grid-cols-3 gap-8 items-start">
+                        <div class="lg:col-span-1 card self-start">
                             <h3 class="text-2xl font-semibold mb-6 text-center accent-blue">Provider Login</h3>
                             <form id="providerLoginForm" class="space-y-6">
                                 <div>
@@ -386,47 +405,60 @@
                             </form>
                         </div>
 
-                        <div class="space-y-8">
-                             <h3 class="text-2xl font-semibold mb-6 text-center text-gray-800">Our Partnership Plans</h3>
-                            <div class="pricing-tier-card card">
-                                <h4 class="text-xl font-semibold mb-2 accent-green">Basic Connect</h4>
-                                <p class="text-3xl font-bold mb-1">$29<span class="text-sm font-normal text-gray-500">/month</span></p>
-                                <p class="text-sm text-gray-600 mb-4">Get started and receive leads in your service area.</p>
-                                <ul class="space-y-2 text-sm text-gray-700 mb-6">
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Profile listing</li>
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Up to 10 leads per month</li>
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Basic support</li>
-                                </ul>
-                                <button class="button button-primary w-full opacity-70 cursor-not-allowed" disabled>Choose Basic (Demo)</button>
-                            </div>
+                        <div class="lg:col-span-2 space-y-8">
+                             <h3 class="text-3xl font-semibold mb-8 text-center text-gray-800">Our Partnership Plans</h3>
+                            <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+                                <div class="pricing-tier-card card">
+                                    <h4 class="text-2xl font-semibold mb-3 text-gray-700">Basic Connect</h4>
+                                    <p class="text-4xl font-extrabold mb-1 accent-green">$39<span class="text-lg font-medium text-gray-500">/mo</span></p>
+                                    <p class="text-sm text-gray-600 mb-6 min-h-[40px]">Essential visibility to start receiving direct customer inquiries.</p>
+                                    <ul class="features-list space-y-3 text-sm text-gray-700 mb-8 text-left">
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Standard Profile Listing (up to 5 services, 5 photos)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Marketplace Visibility in your area</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Up to <strong>12</strong> confirmed booking requests/inquiries per month</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Basic Email Support (48hr target)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Basic Calendar Sync</li>
+                                    </ul>
+                                    <div class="mt-auto pt-4">
+                                        <button class="button button-primary w-full opacity-80 hover:opacity-100">Choose Basic</button>
+                                    </div>
+                                </div>
 
-                            <div class="pricing-tier-card card recommended">
-                                <div class="absolute top-0 right-0 bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg rounded-tr-lg">RECOMMENDED</div>
-                                <h4 class="text-xl font-semibold mb-2 accent-green">Pro Growth</h4>
-                                <p class="text-3xl font-bold mb-1">$59<span class="text-sm font-normal text-gray-500">/month</span></p>
-                                <p class="text-sm text-gray-600 mb-4">Maximize your visibility and job opportunities.</p>
-                                <ul class="space-y-2 text-sm text-gray-700 mb-6">
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Enhanced profile listing</li>
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Up to 30 leads per month</li>
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Priority support</li>
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Featured placement in search results</li>
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Basic analytics</li>
-                                </ul>
-                                <button class="button button-primary w-full">Choose Pro (Demo)</button>
-                            </div>
+                                <div class="pricing-tier-card card recommended">
+                                    <div class="recommended-badge">RECOMMENDED</div>
+                                    <h4 class="text-2xl font-semibold mb-3 text-gray-700">Pro Growth</h4>
+                                    <p class="text-4xl font-extrabold mb-1 accent-green">$79<span class="text-lg font-medium text-gray-500">/mo</span></p>
+                                    <p class="text-sm text-gray-600 mb-6 min-h-[40px]">Increased visibility, more opportunities, and profile enhancement tools.</p>
+                                    <ul class="features-list space-y-3 text-sm text-gray-700 mb-8 text-left">
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> All Basic Connect features, PLUS:</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Enhanced Profile (15 photos, 1 video, badge, 2 featured services)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Priority Placement in search</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Up to <strong>30</strong> confirmed booking requests/inquiries per month</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Simple Performance Insights Dashboard</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Priority Email & Chat Support (24hr target)</li>
+                                    </ul>
+                                    <div class="mt-auto pt-4">
+                                        <button class="button button-primary w-full">Choose Pro</button>
+                                    </div>
+                                </div>
 
-                            <div class="pricing-tier-card card">
-                                <h4 class="text-xl font-semibold mb-2 accent-green">Elite Partner</h4>
-                                <p class="text-3xl font-bold mb-1">$99<span class="text-sm font-normal text-gray-500">/month</span></p>
-                                <p class="text-sm text-gray-600 mb-4">For established businesses aiming for market leadership.</p>
-                                <ul class="space-y-2 text-sm text-gray-700 mb-6">
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Premium profile with video option</li>
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Unlimited leads (fair use)</li>
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Dedicated account manager</li>
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Top placement & advertising boosts</li>
-                                    <li class="flex items-center"><span class="text-green-500 mr-2">✔</span> Advanced analytics & reporting</li>
-                                </ul>
-                                <button class="button button-primary w-full opacity-70 cursor-not-allowed" disabled>Choose Elite (Demo)</button>
+                                <div class="pricing-tier-card card">
+                                    <h4 class="text-2xl font-semibold mb-3 text-gray-700">Elite Partner</h4>
+                                    <p class="text-4xl font-extrabold mb-1 accent-green">$129<span class="text-lg font-medium text-gray-500">/mo</span></p>
+                                    <p class="text-sm text-gray-600 mb-6 min-h-[40px]">Maximum exposure, unlimited opportunities, and premium support.</p>
+                                    <ul class="features-list space-y-3 text-sm text-gray-700 mb-8 text-left">
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> All Pro Growth features, PLUS:</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Premium Profile (unlimited photos, 3 videos, badge, 5 featured services, website link)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Top-Tier Placement & Occasional Marketing Features</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> <strong>Unlimited</strong> confirmed booking requests/inquiries (fair use policy applies)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Advanced Analytics & Benchmarking</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Early Access to New Features</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Integrated Review Management Tools</li>
+                                    </ul>
+                                     <div class="mt-auto pt-4">
+                                        <button class="button button-primary w-full opacity-80 hover:opacity-100">Choose Elite</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
