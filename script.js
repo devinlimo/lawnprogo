@@ -589,7 +589,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setActiveView(initialViewId, initialData);
 });
-
-    </script>
-</body>
-</html>
