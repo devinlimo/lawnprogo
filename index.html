@@ -8,10 +8,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Visualization & Content Choices:
-        - Homepage: Zip Code input. Goal: Entry to service exploration. Interaction: Zip Code input -> Explore Services view. Library/Method: Vanilla JS.
-        - Explore Services - Provider Listing: Filters. Dynamic list of Provider items. Goal: Expedia-like browsing/comparison. Viz/Presentation: HTML/Tailwind list items. Provider images are descriptive placeholders. Interaction: Filters update list. Clicking provider item shows their specific price & populates booking. Library/Method: Vanilla JS.
-        - Simulated Booking (Explore Services): Mock form. Goal: Show PII collection. Interaction: Triggered by provider selection. Library/Method: Vanilla JS.
-        - For Providers Page: Mock Login form. Detailed Pricing Tiers (from LocalProGo_ProviderTiers_v2) displayed as cards. Goal: Show provider-facing aspects & value proposition. Viz/Presentation: HTML/Tailwind. Interaction: Static display. Library/Method: HTML/Tailwind.
+        - Homepage: Zip Code input. Goal: Entry. Interaction: Zip -> Explore. Lib: JS.
+        - Explore Services: Filters, Provider List. Goal: Browse/Compare. Viz: HTML/Tailwind list. Interaction: Filters update list. Click provider -> Provider Profile. Lib: JS.
+        - Provider Profile: Provider details, photos, reviews, service/price selector. Goal: In-depth provider info. Viz: HTML/Tailwind. Interaction: Service/yard selection updates price. Book -> Booking Demo. Lib: JS.
+        - Simulated Booking: Mock form. Goal: Show PII point. Interaction: Triggered from Profile. Lib: JS.
+        - For Providers Page: Login, Pricing Tiers. Goal: Show provider side. Viz: HTML/Tailwind. Lib: HTML/Tailwind.
         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
     -->
     <style>
@@ -66,11 +67,11 @@
             background-color: #218838;
         }
         .button-secondary {
-            background-color: #007bff; 
+            background-color: #6c757d; /* Gray for secondary/back buttons */
             color: white;
         }
         .button-secondary:hover {
-            background-color: #0056b3;
+            background-color: #5a6268;
         }
         
         select, input[type="text"], input[type="email"], input[type="tel"], input[type="search"], input[type="password"] {
@@ -103,7 +104,7 @@
             border-bottom: 2px solid #28a745;
         }
         .star-rating span {
-            color: #ffc107; /* Yellow for stars */
+            color: #ffc107; 
         }
         .provider-list-item {
             background-color: white;
@@ -141,7 +142,7 @@
             border-top-right-radius: 10px; 
             border-bottom-left-radius: 10px;
         }
-        .provider-image-placeholder {
+        .provider-image-placeholder, .profile-gallery-image {
             background-color: #e2e8f0;
             display: flex;
             align-items: center;
@@ -150,6 +151,23 @@
             font-size: 0.875rem;
             text-align: center;
             line-height: 1.2;
+            aspect-ratio: 4/3; /* Maintain aspect ratio */
+            object-fit: cover; /* Ensure images cover the area */
+            border-radius: 8px;
+        }
+        .profile-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.75rem; /* 12px */
+        }
+        .review-item {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .review-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
         }
     </style>
 </head>
@@ -315,9 +333,23 @@
 
                 </div>
             </section>
+        </div>
+        
+        <div id="providerProfileView" class="view">
+            <section class="section bg-gray-100">
+                <div class="container mx-auto">
+                    <button id="backToProvidersButton" class="button button-secondary mb-8">&larr; Back to Listings</button>
+                    <div id="providerProfileContentContainer" class="bg-white rounded-xl shadow-xl p-6 md:p-10">
+                        </div>
+                </div>
+            </section>
+        </div>
 
-            <section id="bookingDemoExplore" class="section hidden bg-white">
+        <div id="bookingDemoExplore" class="view">
+             <section class="section bg-white">
                 <div class="container mx-auto text-center">
+                    <button id="backToProfileButton" class="button button-secondary mb-8 float-left">&larr; Back to Profile</button>
+                    <div class="clear-both"></div>
                     <h2 class="text-3xl font-bold mb-6 text-gray-800">Simulated Booking & Checkout</h2>
                     <p class="text-lg text-gray-600 mb-10 max-w-3xl mx-auto">
                         You're about to book with <strong id="bookingProviderName" class="accent-green"></strong>.
@@ -359,7 +391,7 @@
                                 </div>
                             </div>
                             <div class="flex flex-col sm:flex-row items-center justify-between mt-8 gap-4">
-                                <button type="button" class="button button-secondary w-full sm:w-auto">Create Account & Book (Demo)</button>
+                                <button type="button" class="button button-primary w-full sm:w-auto">Create Account & Book (Demo)</button>
                                 <button type="button" class="text-md accent-blue hover:underline font-medium">Checkout as Guest (Demo)</button>
                             </div>
                             <div id="bookingConfirmationExplore" class="mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-md hidden">
@@ -413,11 +445,11 @@
                                     <p class="text-4xl font-extrabold mb-1 accent-green">$39<span class="text-lg font-medium text-gray-500">/mo</span></p>
                                     <p class="text-sm text-gray-600 mb-6 min-h-[40px]">Essential visibility to start receiving direct customer inquiries.</p>
                                     <ul class="features-list space-y-3 text-sm text-gray-700 mb-8 text-left">
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Standard Profile Listing (up to 5 services, 5 photos)</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Marketplace Visibility in your area</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Up to 12 confirmed booking requests/inquiries per month</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Basic Email Support (48hr target)</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Basic Calendar Sync</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Standard Profile Listing (up to 5 services, 5 photos)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Marketplace Visibility in your area</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Up to <strong class="mx-1">12</strong> confirmed booking requests/inquiries per month</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Basic Email Support (48hr target)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Basic Calendar Sync</li>
                                     </ul>
                                     <div class="mt-auto pt-4">
                                         <button class="button button-primary w-full opacity-80 hover:opacity-100">Choose Basic</button>
@@ -430,12 +462,12 @@
                                     <p class="text-4xl font-extrabold mb-1 accent-green">$79<span class="text-lg font-medium text-gray-500">/mo</span></p>
                                     <p class="text-sm text-gray-600 mb-6 min-h-[40px]">Increased visibility, more opportunities, and profile enhancement tools.</p>
                                     <ul class="features-list space-y-3 text-sm text-gray-700 mb-8 text-left">
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> All Basic Connect features, PLUS:</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Enhanced Profile (15 photos, 1 video, badge, 2 featured services)</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Priority Placement in search</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Up to 30 confirmed booking requests/inquiries per month</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Simple Performance Insights Dashboard</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Priority Email & Chat Support (24hr target)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> All Basic Connect features, PLUS:</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Enhanced Profile (15 photos, 1 video, badge, 2 featured services)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Priority Placement in search</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Up to <strong class="mx-1">30</strong> confirmed booking requests/inquiries per month</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Simple Performance Insights Dashboard</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Priority Email & Chat Support (24hr target)</li>
                                     </ul>
                                     <div class="mt-auto pt-4">
                                         <button class="button button-primary w-full">Choose Pro</button>
@@ -447,13 +479,13 @@
                                     <p class="text-4xl font-extrabold mb-1 accent-green">$129<span class="text-lg font-medium text-gray-500">/mo</span></p>
                                     <p class="text-sm text-gray-600 mb-6 min-h-[40px]">Maximum exposure, unlimited opportunities, and premium support.</p>
                                     <ul class="features-list space-y-3 text-sm text-gray-700 mb-8 text-left">
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> All Pro Growth features, PLUS:</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Premium Profile (unlimited photos, 3 videos, badge, 5 featured services, website link)</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Top-Tier Placement & Occasional Marketing Features</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Unlimited confirmed booking requests/inquiries (fair use policy applies)</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Advanced Analytics & Benchmarking</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Early Access to New Features</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✔</span> Integrated Review Management Tools</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> All Pro Growth features, PLUS:</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Premium Profile (unlimited photos, 3 videos, badge, 5 featured services, website link)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Top-Tier Placement & Occasional Marketing Features</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> <strong class="mr-1">Unlimited</strong> confirmed booking requests/inquiries (fair use policy applies)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Advanced Analytics & Benchmarking</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Early Access to New Features</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Integrated Review Management Tools</li>
                                     </ul>
                                      <div class="mt-auto pt-4">
                                         <button class="button button-primary w-full opacity-80 hover:opacity-100">Choose Elite</button>
@@ -513,6 +545,15 @@
                 rating: 4.8,
                 reviewsCount: 150,
                 imageUrl: "https://placehold.co/400x300/A3E6B4/333333?text=Lush+Green+Lawn",
+                galleryImages: [
+                    "https://placehold.co/600x400/A3E6B4/333333?text=Lawn+View+1",
+                    "https://placehold.co/600x400/A8D5BA/333333?text=Garden+Work",
+                    "https://placehold.co/600x400/B0C9BE/333333?text=Happy+Client+Yard"
+                ],
+                mockReviews: [
+                    { author: "Sarah K.", rating: 5, comment: "Absolutely fantastic job! My lawn has never looked better. Very professional and on time." },
+                    { author: "Mike R.", rating: 4, comment: "Good service, reliable. A bit pricey but the quality is there." }
+                ],
                 servicesOffered: ["mowing", "fertilization", "weeding", "mowingPlus"],
                 basePriceModifier: 1.0, 
                 bio: "Your local experts for a lush, healthy lawn. Serving Dallas for 10+ years with dedication and eco-friendly options.",
@@ -524,6 +565,13 @@
                 rating: 4.5,
                 reviewsCount: 85,
                 imageUrl: "https://placehold.co/400x300/9AE6B4/333333?text=Pro+Mowing+Service",
+                 galleryImages: [
+                    "https://placehold.co/600x400/9AE6B4/333333?text=Striped+Lawn",
+                    "https://placehold.co/600x400/A0D9BB/333333?text=Edging+Detail"
+                ],
+                mockReviews: [
+                    { author: "Linda B.", rating: 5, comment: "Very precise work, they live up to their name. My edges are perfect." }
+                ],
                 servicesOffered: ["mowing", "mowingPlus"],
                 basePriceModifier: 1.1, 
                 bio: "Meticulous mowing and edging. We treat every lawn like our own, ensuring picture-perfect results every time.",
@@ -535,6 +583,11 @@
                 rating: 4.2,
                 reviewsCount: 210,
                 imageUrl: "https://placehold.co/400x300/B3E6B4/333333?text=Friendly+Lawn+Team",
+                galleryImages: ["https://placehold.co/600x400/B3E6B4/333333?text=Affordable+Care"],
+                mockReviews: [
+                    { author: "Tom H.", rating: 4, comment: "Great value for the price. Does a good job with basic mowing." },
+                    { author: "Emily S.", rating: 4, comment: "Reliable and affordable, exactly what I needed." }
+                ],
                 servicesOffered: ["mowing"],
                 basePriceModifier: 0.9, 
                 bio: "Affordable and reliable lawn mowing services for the Dallas area. Quality work that doesn't break the bank.",
@@ -546,6 +599,15 @@
                 rating: 4.9,
                 reviewsCount: 300,
                 imageUrl: "https://placehold.co/400x300/87D3B4/333333?text=Beautiful+Landscaping",
+                galleryImages: [
+                    "https://placehold.co/600x400/87D3B4/333333?text=Landscaped+Flowerbed",
+                    "https://placehold.co/600x400/7FCAB7/333333?text=Tree+Pruning",
+                    "https://placehold.co/600x400/77C2B0/333333?text=Patio+Design"
+                ],
+                mockReviews: [
+                    { author: "David L.", rating: 5, comment: "True masters of their craft! Our yard was transformed. Worth every penny." },
+                     { author: "Jessica P.", rating: 5, comment: "Incredible attention to detail and design. Highly recommend for big projects." }
+                ],
                 servicesOffered: ["mowing", "mowingPlus", "fertilization", "weeding"],
                 basePriceModifier: 1.15,
                 bio: "Premium lawn care and landscaping solutions. We transform yards into outdoor masterpieces.",
@@ -557,6 +619,10 @@
                 rating: 4.6,
                 reviewsCount: 120,
                 imageUrl: "https://placehold.co/400x300/C1E8D4/333333?text=Eco+Fertilizing",
+                galleryImages: ["https://placehold.co/600x400/C1E8D4/333333?text=Organic+Lawn+Care"],
+                mockReviews: [
+                    { author: "Maria G.", rating: 5, comment: "Love their eco-friendly approach! My lawn looks great and I feel good about the products used." }
+                ],
                 servicesOffered: ["mowing", "fertilization"],
                 basePriceModifier: 0.95,
                 bio: "Eco-conscious lawn fertilization and maintenance. We use sustainable practices for a healthier planet.",
@@ -572,6 +638,7 @@
         let currentServiceSelection = "all"; 
         let currentYardSizeSelection = "any";
         let currentSortBy = "rating";
+        let currentProviderId = null; // To store ID of provider being viewed on profile page
 
         function setActiveView(viewId, data = {}) {
             views.forEach(view => {
@@ -606,6 +673,9 @@
                 if(filterSortBy) filterSortBy.value = currentSortBy;
                 
                 renderProviders(); 
+            } else if (viewId === 'providerProfileView' && data.providerId) {
+                currentProviderId = data.providerId;
+                renderProviderProfile(currentProviderId);
             }
             window.scrollTo(0, 0);
         }
@@ -614,8 +684,10 @@
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const targetViewId = e.target.getAttribute('href').substring(1) + "View";
-                setActiveView(targetViewId);
-                history.pushState({view: targetViewId, zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", e.target.getAttribute('href'));
+                // Reset providerId if navigating away from a profile page via main nav
+                const data = (targetViewId === 'providerProfileView' && currentProviderId) ? { providerId: currentProviderId } : { zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy };
+                setActiveView(targetViewId, data);
+                history.pushState({view: targetViewId, ...data}, "", e.target.getAttribute('href'));
             });
         });
 
@@ -634,6 +706,7 @@
             if(data.service) currentServiceSelection = data.service;
             if(data.yardSize) currentYardSizeSelection = data.yardSize;
             if(data.sortBy) currentSortBy = data.sortBy;
+            if(data.providerId) currentProviderId = data.providerId;
             setActiveView(targetView, data);
         });
 
@@ -774,15 +847,187 @@
                              <p class="text-xl font-bold accent-green">${displayPriceRange}</p>
                              <p class="text-xs text-gray-500">(for ${serviceData[effectiveServiceKey] ? serviceData[effectiveServiceKey].name : 'selected service'} / ${effectiveYardSizeKey} yard)</p>
                         </div>
-                        <button data-provider-id="${provider.id}" data-service-key="${effectiveServiceKey}" data-yard-size-key="${effectiveYardSizeKey}" data-price-string="${displayPriceRange}" class="proceed-to-book-provider-btn button button-primary w-full sm:w-auto text-sm">View Details & Book</button>
+                        <button data-provider-id="${provider.id}" class="view-provider-profile-btn button button-primary w-full sm:w-auto text-sm">View Details & Book</button>
                     </div>
                 `;
                 providerListingsContainer.appendChild(listItem);
             });
 
-            document.querySelectorAll('.proceed-to-book-provider-btn').forEach(button => {
-                button.addEventListener('click', handleProceedToBookFromProvider);
+            document.querySelectorAll('.view-provider-profile-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const providerId = parseInt(this.dataset.providerId);
+                    setActiveView('providerProfileView', { providerId: providerId });
+                    history.pushState({view: 'providerProfileView', providerId: providerId, zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", `#providerProfile?id=${providerId}`);
+                });
             });
+        }
+
+        // --- Provider Profile View JS ---
+        const providerProfileContentContainer = document.getElementById('providerProfileContentContainer');
+        const backToProvidersButton = document.getElementById('backToProvidersButton');
+        const backToProfileButton = document.getElementById('backToProfileButton');
+
+
+        if (backToProvidersButton) {
+            backToProvidersButton.addEventListener('click', () => {
+                setActiveView('exploreServicesView', {zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy});
+                history.pushState({view: 'exploreServicesView', zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", "#exploreServices");
+            });
+        }
+        if (backToProfileButton) {
+            backToProfileButton.addEventListener('click', () => {
+                if (currentProviderId) {
+                     setActiveView('providerProfileView', { providerId: currentProviderId });
+                     history.pushState({view: 'providerProfileView', providerId: currentProviderId, zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", `#providerProfile?id=${currentProviderId}`);
+                } else {
+                    // Fallback if no currentProviderId (should not happen in normal flow)
+                    setActiveView('exploreServicesView', {zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy});
+                    history.pushState({view: 'exploreServicesView', zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", "#exploreServices");
+                }
+            });
+        }
+
+
+        function renderProviderProfile(providerId) {
+            if (!providerProfileContentContainer) return;
+            const provider = mockProviders.find(p => p.id === providerId);
+            if (!provider) {
+                providerProfileContentContainer.innerHTML = `<p class="text-red-500">Provider not found.</p>`;
+                return;
+            }
+
+            let galleryHTML = '<div class="profile-gallery-grid">';
+            if (provider.galleryImages && provider.galleryImages.length > 0) {
+                provider.galleryImages.forEach(imgUrl => {
+                    galleryHTML += `<img src="${imgUrl}" alt="${provider.name} work sample" class="profile-gallery-image w-full h-auto object-cover rounded-md">`;
+                });
+            } else {
+                galleryHTML += `<div class="profile-gallery-image">No images available</div>`.repeat(3); // Show 3 placeholders
+            }
+            galleryHTML += '</div>';
+
+            let reviewsHTML = '<h3 class="text-2xl font-semibold mb-4 text-gray-800">Customer Reviews</h3>';
+            if (provider.mockReviews && provider.mockReviews.length > 0) {
+                provider.mockReviews.forEach(review => {
+                    reviewsHTML += `
+                        <div class="review-item">
+                            <p class="review-author text-gray-700">${review.author}</p>
+                            <div class="review-rating text-sm mb-1">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                            <p class="text-sm text-gray-600">${review.comment}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                reviewsHTML += `<p class="text-sm text-gray-500">No reviews yet for ${provider.name}.</p>`;
+            }
+
+            let serviceOptionsHTML = provider.servicesOffered.map(serviceKey => {
+                const serviceDetail = serviceData[serviceKey];
+                return `<option value="${serviceKey}">${serviceDetail ? serviceDetail.name : serviceKey}</option>`;
+            }).join('');
+
+            const initialServiceKey = currentServiceSelection === 'all' || !provider.servicesOffered.includes(currentServiceSelection) ? provider.servicesOffered[0] : currentServiceSelection;
+            const initialYardSizeKey = currentYardSizeSelection === 'any' ? 'medium' : currentYardSizeSelection;
+            const initialPriceRange = calculateProviderPriceRange(provider, initialServiceKey, initialYardSizeKey);
+
+
+            providerProfileContentContainer.innerHTML = `
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="md:col-span-1">
+                        <img src="${provider.imageUrl}" alt="${provider.name}" class="w-full h-64 object-cover rounded-lg shadow-md mb-6" onerror="this.onerror=null;this.src='https://placehold.co/600x400/FEE2E2/B91C1C?text=Image+Error';">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">${provider.name}</h2>
+                        <div class="star-rating text-lg text-gray-600 mb-2 flex items-center">
+                            <span>${'★'.repeat(Math.floor(provider.rating))}${'☆'.repeat(5 - Math.floor(provider.rating))}</span>
+                            <span class="ml-2">${provider.rating.toFixed(1)} (${provider.reviewsCount} reviews)</span>
+                        </div>
+                        <p class="text-md text-gray-600 mb-4">${provider.bio}</p>
+                        <p class="text-sm text-gray-500 mb-1"><strong class="font-medium text-gray-700">Availability:</strong> ${provider.availability}</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Services & Pricing</h3>
+                        <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="profileServiceType" class="block text-sm font-medium text-gray-700 mb-1">Select Service:</label>
+                                    <select id="profileServiceType" class="mt-1 block w-full">
+                                        ${serviceOptionsHTML}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="profileYardSize" class="block text-sm font-medium text-gray-700 mb-1">Estimated Yard Size:</label>
+                                    <select id="profileYardSize" class="mt-1 block w-full">
+                                        <option value="small">Small (under 3,000 sq ft)</option>
+                                        <option value="medium">Medium (3,000 - 7,000 sq ft)</option>
+                                        <option value="large">Large (7,000 - 10,000 sq ft)</option>
+                                        <option value="xlarge">Extra Large (10,000+ sq ft)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="profileServiceDetails" class="p-4 bg-green-50 rounded-md text-left border border-green-200">
+                                <h4 class="font-semibold text-lg accent-green mb-1">Service Details:</h4>
+                                <p id="profileServiceDescription" class="text-sm text-gray-700 mt-1 mb-2">Select a service and yard size.</p>
+                                <p class="text-lg font-bold">Estimated Price: <span id="profilePriceRange" class="accent-green text-xl">$--</span></p>
+                            </div>
+                            <button id="bookThisProviderBtn" class="button button-primary w-full mt-6 text-lg">Book with ${provider.name}</button>
+                        </div>
+
+                        <div class="mt-8">
+                            <h3 class="text-2xl font-semibold mb-4 text-gray-800">Photo Gallery</h3>
+                            ${galleryHTML}
+                        </div>
+                         <div class="mt-8">
+                            ${reviewsHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Set initial values for selects on profile page
+            const profileServiceTypeSelect = document.getElementById('profileServiceType');
+            const profileYardSizeSelect = document.getElementById('profileYardSize');
+            if(profileServiceTypeSelect) profileServiceTypeSelect.value = initialServiceKey;
+            if(profileYardSizeSelect) profileYardSizeSelect.value = initialYardSizeKey;
+            updateProfilePriceDetails(provider); // Update price based on initial selection
+
+            if(profileServiceTypeSelect) profileServiceTypeSelect.addEventListener('change', () => updateProfilePriceDetails(provider));
+            if(profileYardSizeSelect) profileYardSizeSelect.addEventListener('change', () => updateProfilePriceDetails(provider));
+
+            document.getElementById('bookThisProviderBtn').addEventListener('click', () => {
+                const selectedServiceKey = document.getElementById('profileServiceType').value;
+                const selectedYardSizeKey = document.getElementById('profileYardSize').value;
+                const priceString = document.getElementById('profilePriceRange').textContent;
+                handleProceedToBookFromProvider({ 
+                    currentTarget: { // Mock event target
+                        dataset: {
+                            providerId: provider.id,
+                            serviceKey: selectedServiceKey,
+                            yardSizeKey: selectedYardSizeKey,
+                            priceString: priceString
+                        }
+                    }
+                });
+            });
+        }
+
+        function updateProfilePriceDetails(provider) {
+            const serviceSelect = document.getElementById('profileServiceType');
+            const yardSelect = document.getElementById('profileYardSize');
+            const descriptionEl = document.getElementById('profileServiceDescription');
+            const priceEl = document.getElementById('profilePriceRange');
+
+            if (!serviceSelect || !yardSelect || !descriptionEl || !priceEl || !provider) return;
+
+            const selectedServiceKey = serviceSelect.value;
+            const selectedYardSizeKey = yardSelect.value;
+            
+            const service = serviceData[selectedServiceKey];
+            if (service) {
+                descriptionEl.textContent = service.description;
+                priceEl.textContent = calculateProviderPriceRange(provider, selectedServiceKey, selectedYardSizeKey);
+            } else {
+                descriptionEl.textContent = "Select a service.";
+                priceEl.textContent = "$--";
+            }
         }
         
         function handleProceedToBookFromProvider(event) {
@@ -794,7 +1039,9 @@
 
             const provider = mockProviders.find(p => p.id === providerId);
             const service = serviceData[serviceKey];
-            const yardSizeText = Array.from(document.getElementById('filterYardSize').options).find(opt => opt.value === yardSizeKey)?.text || yardSizeKey;
+            const yardSizeSelectEl = document.getElementById('profileYardSize') || document.getElementById('filterYardSize'); // Check both contexts
+            const yardSizeText = Array.from(yardSizeSelectEl.options).find(opt => opt.value === yardSizeKey)?.text || yardSizeKey;
+
 
             if (provider && service && bookingDemoExploreSection) {
                 if(confirmProviderNameEl) confirmProviderNameEl.textContent = provider.name;
@@ -803,9 +1050,9 @@
                 if(bookedYardSizeDisplayExplore) bookedYardSizeDisplayExplore.textContent = yardSizeText;
                 if(bookedPriceDisplayExplore) bookedPriceDisplayExplore.textContent = priceString;
                 
-                bookingDemoExploreSection.classList.remove('hidden');
-                bookingDemoExploreSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                if(bookingConfirmationExploreDiv) bookingConfirmationExploreDiv.classList.add('hidden');
+                setActiveView('bookingDemoExplore', { providerId: providerId, service: serviceKey, yardSize: yardSizeKey, price: priceString });
+                history.pushState({view: 'bookingDemoExplore', providerId: providerId, service: serviceKey, yardSize: yardSizeKey, price: priceString, zip: currentZipCode, sortBy: currentSortBy}, "", `#booking?provider=${providerId}&service=${serviceKey}`);
+
             }
         }
 
@@ -830,20 +1077,52 @@
         document.getElementById('currentYear').textContent = new Date().getFullYear();
 
         document.addEventListener('DOMContentLoaded', () => {
-            const initialHash = window.location.hash.substring(1); 
+            const hash = window.location.hash.substring(1);
             let initialViewId = 'homeView';
             let initialData = {};
 
-            if (initialHash === 'exploreServices') {
+            if (hash.startsWith('providerProfile?id=')) {
+                initialViewId = 'providerProfileView';
+                initialData.providerId = parseInt(hash.split('=')[1]);
+                currentProviderId = initialData.providerId; // Store it globally
+                 // Try to restore other state if available (e.g., from full page reload)
+                if (history.state) {
+                    if (history.state.zip) currentZipCode = history.state.zip;
+                    if (history.state.service) currentServiceSelection = history.state.service;
+                    if (history.state.yardSize) currentYardSizeSelection = history.state.yardSize;
+                    if (history.state.sortBy) currentSortBy = history.state.sortBy;
+                }
+
+            } else if (hash === 'exploreServices') {
                 initialViewId = 'exploreServicesView';
-                if (history.state && history.state.zip) initialData.zip = history.state.zip;
-                if (history.state && history.state.service) initialData.service = history.state.service;
-                if (history.state && history.state.yardSize) currentYardSizeSelection = history.state.yardSize;
-                if (history.state && history.state.sortBy) currentSortBy = history.state.sortBy;
-            } else if (initialHash === 'providers') {
+                if (history.state) { // Restore state if available
+                    if (history.state.zip) initialData.zip = history.state.zip;
+                    if (history.state.service) initialData.service = history.state.service;
+                    if (history.state.yardSize) currentYardSizeSelection = history.state.yardSize;
+                    if (history.state.sortBy) currentSortBy = history.state.sortBy;
+                }
+            } else if (hash === 'providers') {
                 initialViewId = 'providersView';
-            }
-            else {
+            } else if (hash.startsWith('booking?provider=')) {
+                initialViewId = 'bookingDemoExplore';
+                 // Extract data from hash or state for booking page
+                const params = new URLSearchParams(hash.split('?')[1]);
+                initialData.providerId = parseInt(params.get('provider'));
+                initialData.service = params.get('service');
+                // You might want to fetch provider and service data here to populate the booking form correctly
+                // For now, it relies on global state which might be stale on direct load.
+                // This part needs more robust state handling for direct booking page loads.
+                const provider = mockProviders.find(p => p.id === initialData.providerId);
+                const service = serviceData[initialData.service];
+                if(provider && service && confirmProviderNameEl && bookingProviderNameEl && bookedServiceDisplayExplore && bookedPriceDisplayExplore) {
+                    confirmProviderNameEl.textContent = provider.name;
+                    bookingProviderNameEl.textContent = provider.name;
+                    bookedServiceDisplayExplore.textContent = service.name;
+                    // Price would need to be recalculated or passed via state/params
+                    // bookedPriceDisplayExplore.textContent = "Recalculate or pass price"; 
+                }
+
+            } else { // Default to home
                  history.replaceState({view: 'homeView'}, "", "#home");
             }
             setActiveView(initialViewId, initialData);
