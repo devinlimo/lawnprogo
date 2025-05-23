@@ -7,6 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Visualization & Content Choices:
+        - Homepage: Zip Code input. Goal: Entry. Interaction: Zip -> Explore. Lib: JS.
+        - Explore Services: Filters, Provider List. Goal: Browse/Compare. Viz: HTML/Tailwind list. Provider images are descriptive placeholders (one reflecting Gecko Green). Interaction: Filters update list. Click provider -> Provider Profile. Lib: JS.
+        - Provider Profile: Provider details (incl. simulated real data for Gecko Green), photos, reviews, service/price selector. Goal: In-depth provider info. Viz: HTML/Tailwind. Interaction: Service/yard selection updates price. Book -> Booking Demo. Lib: JS.
+        - Simulated Booking: Mock form. Goal: Show PII point. Interaction: Triggered from Profile. Lib: JS.
+        - For Providers Page: Login, Pricing Tiers. Goal: Show provider side. Viz: HTML/Tailwind. Lib: HTML/Tailwind.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -135,11 +143,11 @@
             border-bottom-left-radius: 10px;
         }
         .provider-image-placeholder, .profile-gallery-image {
-            background-color: #e9ecef; /* Slightly darker placeholder */
+            background-color: #e9ecef;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #6c757d; /* Darker text for placeholder */
+            color: #6c757d; 
             font-size: 0.875rem;
             text-align: center;
             line-height: 1.2;
@@ -448,7 +456,7 @@
                                     <ul class="features-list space-y-3 text-sm text-gray-700 mb-8 text-left">
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Standard Profile Listing (up to 5 services, 5 photos)</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Marketplace Visibility in your area</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Up to <strong class="mx-1">12</strong> confirmed booking requests/inquiries per month</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Up to 12 confirmed booking requests/inquiries per month</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Basic Email Support (48hr target)</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Basic Calendar Sync</li>
                                     </ul>
@@ -466,7 +474,7 @@
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> All Basic Connect features, PLUS:</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Enhanced Profile (15 photos, 1 video, badge, 2 featured services)</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Priority Placement in search</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Up to <strong class="mx-1">30</strong> confirmed booking requests/inquiries per month</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Up to 30 confirmed booking requests/inquiries per month</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Simple Performance Insights Dashboard</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Priority Email & Chat Support (24hr target)</li>
                                     </ul>
@@ -483,7 +491,7 @@
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> All Pro Growth features, PLUS:</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Premium Profile (unlimited photos, 3 videos, badge, 5 featured services, website link)</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Top-Tier Placement & Occasional Marketing Features</li>
-                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> <strong class="mr-1">Unlimited</strong> confirmed booking requests/inquiries (fair use policy applies)</li>
+                                        <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Unlimited confirmed booking requests/inquiries (fair use policy applies)</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Advanced Analytics & Benchmarking</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Early Access to New Features</li>
                                         <li class="flex items-start"><span class="text-green-500 mr-2 mt-1 shrink-0">✔</span> Integrated Review Management Tools</li>
@@ -539,34 +547,31 @@
             }
         };
 
-        // Simulate a "real" Dallas company entry
-        const geckoGreenData = {
-            id: 6, // New unique ID
-            name: "Gecko Green Lawn Care",
-            rating: 4.8, // From search result (Source 1.2)
-            reviewsCount: 4448, // From search result (Source 1.2)
-            imageUrl: "https://placehold.co/400x300/2E8B57/FFFFFF?text=Gecko+Green+Lawn", // Placeholder
-            galleryImages: [
-                "https://placehold.co/600x400/2E8B57/FFFFFF?text=Gecko+Green+Yard+1",
-                "https://placehold.co/600x400/3CB371/FFFFFF?text=Gecko+Green+Service",
-                "https://placehold.co/600x400/66CDAA/FFFFFF?text=Happy+Gecko+Customer"
-            ],
-            mockReviews: [
-                { author: "J. Smith", rating: 5, comment: "Gecko Green transformed my lawn! Very professional and knowledgeable. Their team was courteous and the results speak for themselves. Best lawn care in Dallas!" },
-                { author: "Maria L.", rating: 4, comment: "Good reliable service. My lawn is definitely greener. A bit on the pricey side but they are thorough." },
-                { author: "David P.", rating: 5, comment: "Used them for fertilization and weed control. Significant improvement in just a few weeks. Highly recommend their expertise." }
-            ],
-            servicesOffered: ["mowing", "fertilization", "weeding", "mowingPlus"], // Assuming they offer these
-            basePriceModifier: 1.1, // Assuming slightly premium
-            bio: "Locally-owned & service-first! Premier professional lawn care in North Texas. With over 20 years of experience, we make lawn care easy. We tailor services to your lawn's needs and the unique climate of North Texas! (Simulated bio based on search result Source 1.2)",
-            availability: "Call for schedule",
-            address: "Serves Dallas, TX (Specific address from GBP not used directly in this public demo)", // Simulated
-            phone: "(972) 899-9249", // From search result (Source 1.2)
-            website: "geckogreen.com" // From search result (Source 1.2)
-        };
-
         let mockProviders = [
-            geckoGreenData, // Add the "real" company
+            {
+                id: 6, 
+                name: "Gecko Green Lawn Care",
+                rating: 4.8, 
+                reviewsCount: 4448, 
+                imageUrl: "https://placehold.co/400x300/2E8B57/FFFFFF?text=Gecko+Green+Lawn", 
+                galleryImages: [
+                    "https://placehold.co/600x400/2E8B57/FFFFFF?text=Gecko+Green%3A+Yard+1",
+                    "https://placehold.co/600x400/3CB371/FFFFFF?text=Gecko+Green%3A+Service",
+                    "https://placehold.co/600x400/66CDAA/FFFFFF?text=Gecko+Green%3A+Happy+Customer"
+                ],
+                mockReviews: [
+                    { author: "J. Smith", rating: 5, comment: "Gecko Green transformed my lawn! Very professional and knowledgeable. Their team was courteous and the results speak for themselves. Best lawn care in Dallas!" },
+                    { author: "Maria L.", rating: 4, comment: "Good reliable service. My lawn is definitely greener. A bit on the pricey side but they are thorough." },
+                    { author: "David P.", rating: 5, comment: "Used them for fertilization and weed control. Significant improvement in just a few weeks. Highly recommend their expertise." }
+                ],
+                servicesOffered: ["mowing", "fertilization", "weeding", "mowingPlus"], 
+                basePriceModifier: 1.1, 
+                bio: "Locally-owned & service-first! Premier professional lawn care in North Texas. With over 20 years of experience, we make lawn care easy from a team you can trust. We tailor services to your lawn's needs and the unique climate of North Texas!",
+                availability: "Call for schedule",
+                address: "Serves Dallas, TX", 
+                phone: "(972) 899-9249", 
+                website: "geckogreen.com" 
+            },
             {
                 id: 1,
                 name: "GreenThumb Experts",
@@ -698,7 +703,7 @@
             if(data.service) currentServiceSelection = data.service;
             if(data.yardSize) currentYardSizeSelection = data.yardSize;
             if(data.sortBy) currentSortBy = data.sortBy;
-            if(data.providerId) currentProviderId = data.providerId; // Make sure to restore currentProviderId
+            if(data.providerId) currentProviderId = data.providerId; 
             setActiveView(targetView, data);
         });
 
@@ -848,7 +853,7 @@
             document.querySelectorAll('.view-provider-profile-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const providerId = parseInt(this.dataset.providerId);
-                    currentProviderId = providerId; // Store globally for back button context
+                    currentProviderId = providerId; 
                     setActiveView('providerProfileView', { providerId: providerId });
                     history.pushState({view: 'providerProfileView', providerId: providerId, zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", `#providerProfile?id=${providerId}`);
                 });
@@ -860,6 +865,7 @@
         const backToProvidersButton = document.getElementById('backToProvidersButton');
         const backToProfileButton = document.getElementById('backToProfileButton');
 
+
         if (backToProvidersButton) {
             backToProvidersButton.addEventListener('click', () => {
                 setActiveView('exploreServicesView', {zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy});
@@ -868,11 +874,10 @@
         }
         if (backToProfileButton) {
             backToProfileButton.addEventListener('click', () => {
-                if (currentProviderId) { // Ensure currentProviderId is set
+                if (currentProviderId) { 
                      setActiveView('providerProfileView', { providerId: currentProviderId });
                      history.pushState({view: 'providerProfileView', providerId: currentProviderId, zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", `#providerProfile?id=${currentProviderId}`);
                 } else {
-                    // Fallback if currentProviderId is somehow not set
                     setActiveView('exploreServicesView', {zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy});
                     history.pushState({view: 'exploreServicesView', zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", "#exploreServices");
                 }
@@ -890,11 +895,11 @@
             let galleryHTML = '<div class="profile-gallery-grid mb-8">';
             if (provider.galleryImages && provider.galleryImages.length > 0) {
                 provider.galleryImages.forEach(imgUrl => {
-                    galleryHTML += `<img src="${imgUrl}" alt="${provider.name} work sample" class="profile-gallery-image w-full object-cover rounded-md shadow hover:shadow-lg transition-shadow">`;
+                    galleryHTML += `<img src="${imgUrl}" alt="${provider.name} work sample" class="profile-gallery-image w-full object-cover rounded-md shadow hover:shadow-lg transition-shadow" onerror="this.onerror=null;this.src='https://placehold.co/400x300/FEE2E2/B91C1C?text=Gallery+Img+Err';">`;
                 });
             } else {
-                for(let i=0; i < 3; i++) { // Show 3 placeholders if no images
-                    galleryHTML += `<div class="profile-gallery-image">Placeholder ${i+1}</div>`;
+                for(let i=0; i < 3; i++) { 
+                    galleryHTML += `<div class="profile-gallery-image">Placeholder Image ${i+1}</div>`;
                 }
             }
             galleryHTML += '</div>';
@@ -921,14 +926,13 @@
                 return `<option value="${serviceKey}">${serviceDetail ? serviceDetail.name : serviceKey}</option>`;
             }).join('');
             
-            // Try to use globally selected filters as defaults, or provider's first service / medium yard
             const initialProfileServiceKey = provider.servicesOffered.includes(currentServiceSelection) && currentServiceSelection !== 'all' ? currentServiceSelection : provider.servicesOffered[0];
             const initialProfileYardSizeKey = currentYardSizeSelection !== 'any' ? currentYardSizeSelection : 'medium';
-
+            
             providerProfileContentContainer.innerHTML = `
                 <div class="grid md:grid-cols-12 gap-8">
                     <div class="md:col-span-4">
-                        <img src="${provider.imageUrl}" alt="${provider.name}" class="w-full h-auto object-cover rounded-lg shadow-xl mb-6" onerror="this.onerror=null;this.src='https://placehold.co/600x400/FEE2E2/B91C1C?text=Main+Image+Error';">
+                        <img src="${provider.imageUrl}" alt="${provider.name}" class="w-full h-auto max-h-80 object-cover rounded-lg shadow-xl mb-6" onerror="this.onerror=null;this.src='https://placehold.co/600x400/FEE2E2/B91C1C?text=Main+Image+Error';">
                         <h2 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-2">${provider.name}</h2>
                         <div class="star-rating text-lg text-gray-600 mb-3 flex items-center">
                             <span>${'★'.repeat(Math.floor(provider.rating))}${'☆'.repeat(5 - Math.floor(provider.rating))}</span>
@@ -937,7 +941,7 @@
                         <p class="text-md text-gray-600 mb-4 leading-relaxed">${provider.bio}</p>
                         <p class="text-sm text-gray-500 mb-1"><strong class="font-medium text-gray-700">Availability:</strong> ${provider.availability}</p>
                          ${provider.phone ? `<p class="text-sm text-gray-500 mb-1"><strong class="font-medium text-gray-700">Phone:</strong> <a href="tel:${provider.phone}" class="accent-blue hover:underline">${provider.phone}</a></p>` : ''}
-                         ${provider.website ? `<p class="text-sm text-gray-500 mb-4"><strong class="font-medium text-gray-700">Website:</strong> <a href="http://${provider.website}" target="_blank" rel="noopener noreferrer" class="accent-blue hover:underline">${provider.website}</a></p>` : ''}
+                         ${provider.website ? `<p class="text-sm text-gray-500 mb-4"><strong class="font-medium text-gray-700">Website:</strong> <a href="https://${provider.website}" target="_blank" rel="noopener noreferrer" class="accent-blue hover:underline">${provider.website}</a></p>` : ''}
                          ${provider.address ? `<p class="text-sm text-gray-500"><strong class="font-medium text-gray-700">Serves:</strong> ${provider.address}</p>` : ''}
                     </div>
                     <div class="md:col-span-8">
@@ -994,16 +998,7 @@
                 const selectedYardSizeKey = document.getElementById('profileYardSize').value;
                 const priceString = document.getElementById('profilePriceRange').textContent;
                 
-                handleProceedToBookFromProvider({ 
-                    currentTarget: { 
-                        dataset: {
-                            providerId: provider.id,
-                            serviceKey: selectedServiceKey,
-                            yardSizeKey: selectedYardSizeKey,
-                            priceString: priceString
-                        }
-                    }
-                });
+                handleProceedToBookFromProfile(provider, selectedServiceKey, selectedYardSizeKey, priceString);
             });
         }
 
@@ -1022,20 +1017,35 @@
             if (service) {
                 descriptionEl.textContent = service.description;
                 priceEl.textContent = calculateProviderPriceRange(provider, selectedServiceKey, selectedYardSizeKey);
-                 // Update button dataset for booking
                 const bookBtn = document.getElementById('bookThisProviderBtn');
                 if(bookBtn) {
                     bookBtn.dataset.serviceKey = selectedServiceKey;
                     bookBtn.dataset.yardSizeKey = selectedYardSizeKey;
                     bookBtn.dataset.priceString = priceEl.textContent;
                 }
-
             } else {
                 descriptionEl.textContent = "Select a service.";
                 priceEl.textContent = "$--";
             }
         }
         
+        function handleProceedToBookFromProfile(provider, serviceKey, yardSizeKey, priceString) {
+            const service = serviceData[serviceKey];
+            const yardSizeSelectEl = document.getElementById('profileYardSize');
+            const yardSizeText = Array.from(yardSizeSelectEl.options).find(opt => opt.value === yardSizeKey)?.text || yardSizeKey;
+
+            if (provider && service && bookingDemoExploreSection) {
+                if(confirmProviderNameEl) confirmProviderNameEl.textContent = provider.name;
+                if(bookingProviderNameEl) bookingProviderNameEl.textContent = provider.name;
+                if(bookedServiceDisplayExplore) bookedServiceDisplayExplore.textContent = service.name;
+                if(bookedYardSizeDisplayExplore) bookedYardSizeDisplayExplore.textContent = yardSizeText;
+                if(bookedPriceDisplayExplore) bookedPriceDisplayExplore.textContent = priceString;
+                
+                setActiveView('bookingDemoExplore', { providerId: provider.id, service: serviceKey, yardSize: yardSizeKey, price: priceString });
+                history.pushState({view: 'bookingDemoExplore', providerId: provider.id, service: serviceKey, yardSize: yardSizeKey, price: priceString, zip: currentZipCode, sortBy: currentSortBy}, "", `#booking?provider=${provider.id}&service=${serviceKey}`);
+            }
+        }
+
         if (filterServiceTypeSelect) filterServiceTypeSelect.addEventListener('change', (e) => { currentServiceSelection = e.target.value; renderProviders(); });
         if (filterYardSizeSelect) filterYardSizeSelect.addEventListener('change', (e) => { currentYardSizeSelection = e.target.value; renderProviders(); });
         if (filterSortBySelect) filterSortBySelect.addEventListener('change', (e) => { currentSortBy = e.target.value; renderProviders(); });
@@ -1060,7 +1070,6 @@
             const hash = window.location.hash.substring(1); 
             let initialViewId = 'homeView';
             let initialData = {};
-
             const params = new URLSearchParams(hash.split('?')[1]);
 
             if (hash.startsWith('providerProfile')) {
@@ -1068,18 +1077,18 @@
                 initialData.providerId = parseInt(params.get('id'));
                 currentProviderId = initialData.providerId; 
                 if (history.state) {
-                    if (history.state.zip) currentZipCode = history.state.zip; else currentZipCode = "Dallas, TX"; // default if no state
-                    if (history.state.service) currentServiceSelection = history.state.service; else currentServiceSelection = "all";
-                    if (history.state.yardSize) currentYardSizeSelection = history.state.yardSize; else currentYardSizeSelection = "any";
-                    if (history.state.sortBy) currentSortBy = history.state.sortBy; else currentSortBy = "rating";
+                    currentZipCode = history.state.zip || "Dallas, TX";
+                    currentServiceSelection = history.state.service || "all";
+                    currentYardSizeSelection = history.state.yardSize || "any";
+                    currentSortBy = history.state.sortBy || "rating";
                 }
             } else if (hash === 'exploreServices') {
                 initialViewId = 'exploreServicesView';
                 if (history.state) { 
-                    if (history.state.zip) initialData.zip = history.state.zip;
-                    if (history.state.service) initialData.service = history.state.service;
-                    if (history.state.yardSize) currentYardSizeSelection = history.state.yardSize;
-                    if (history.state.sortBy) currentSortBy = history.state.sortBy;
+                    initialData.zip = history.state.zip;
+                    initialData.service = history.state.service;
+                    currentYardSizeSelection = history.state.yardSize || "any";
+                    currentSortBy = history.state.sortBy || "rating";
                 }
             } else if (hash === 'providers') {
                 initialViewId = 'providersView';
@@ -1087,22 +1096,19 @@
                 initialViewId = 'bookingDemoExplore';
                 initialData.providerId = parseInt(params.get('provider'));
                 initialData.service = params.get('service');
-                currentProviderId = initialData.providerId; 
-
+                currentProviderId = initialData.providerId;
+                
                 const provider = mockProviders.find(p => p.id === initialData.providerId);
                 const service = serviceData[initialData.service];
                 if(provider && service && confirmProviderNameEl && bookingProviderNameEl && bookedServiceDisplayExplore && bookedPriceDisplayExplore) {
                     confirmProviderNameEl.textContent = provider.name;
                     bookingProviderNameEl.textContent = provider.name;
                     bookedServiceDisplayExplore.textContent = service.name;
-                    // This needs the yard size that was used to generate the price for booking.
-                    // For simplicity, assuming it was 'medium' if not passed, or it needs to be passed in state/params
                     const yardSizeForBooking = (history.state && history.state.yardSize) ? history.state.yardSize : 'medium'; 
                     const priceForBooking = (history.state && history.state.price) ? history.state.price : calculateProviderPriceRange(provider, initialData.service, yardSizeForBooking);
                     bookedPriceDisplayExplore.textContent = priceForBooking;
-                    if(bookedYardSizeDisplayExplore) bookedYardSizeDisplayExplore.textContent = Array.from(document.getElementById('filterYardSize').options).find(opt => opt.value === yardSizeForBooking)?.text || yardSizeForBooking;
-
-
+                    const yardSizeSelectEl = document.getElementById('filterYardSize'); 
+                    if(bookedYardSizeDisplayExplore && yardSizeSelectEl) bookedYardSizeDisplayExplore.textContent = Array.from(yardSizeSelectEl.options).find(opt => opt.value === yardSizeForBooking)?.text || yardSizeForBooking;
                 }
             } else { 
                  history.replaceState({view: 'homeView'}, "", "#home");
