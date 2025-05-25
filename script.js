@@ -108,7 +108,7 @@ let zipCodeForm, zipCodeInput, zipError, categoryLinks;
 let exploreServicesZipDisplay, filterServiceTypeSelect, filterYardSizeSelect, filterSortBySelect, providerListingsContainer, noProvidersMessage;
 let providerProfileContentContainer, backToProvidersButton;
 let bookingDemoExploreSection, bookedServiceDisplayExplore, bookedYardSizeDisplayExplore, bookedPriceDisplayExplore, showBookingConfirmationBtnExplore, bookingConfirmationExploreDiv, confirmProviderNameEl, bookingProviderNameEl, backToProfileButton;
-let providerLoginForm; // Declared once here
+let providerLoginForm; 
 
 // --- State Variables ---
 let currentZipCode = "Dallas, TX";
@@ -118,7 +118,6 @@ let currentSortBy = "rating";
 let currentProviderId = null;
 
 function initializeElements() {
-    console.log("Initializing DOM elements...");
     views = document.querySelectorAll('.view');
     navLinks = document.querySelectorAll('.nav-link');
     siteTitleLink = document.querySelector('.site-title');
@@ -148,9 +147,7 @@ function initializeElements() {
     bookingProviderNameEl = document.getElementById('bookingProviderName');
     backToProfileButton = document.getElementById('backToProfileButton');
     
-    // Assign to the globally declared variable, do not re-declare with let or const
     providerLoginForm = document.getElementById('providerLoginForm'); 
-    console.log("DOM elements initialized. Views found:", views.length, "Nav links found:", navLinks.length);
 }
 
 function setMetaDescription(description) {
@@ -165,7 +162,6 @@ function setMetaDescription(description) {
 }
 
 function setActiveView(viewId, data = {}) {
-    console.log(`Attempting to set active view to: ${viewId} with data:`, data);
     if (!views || views.length === 0) {
         console.error("setActiveView called before elements initialized. Attempting to initialize now.");
         initializeElements(); 
@@ -181,7 +177,6 @@ function setActiveView(viewId, data = {}) {
             if (view.id === viewId) {
                 view.classList.add('active');
                 viewFound = true;
-                console.log(`View ${viewId} activated.`);
             } else {
                 view.classList.remove('active');
             }
@@ -190,7 +185,6 @@ function setActiveView(viewId, data = {}) {
     if (!viewFound) {
         console.error(`View with ID ${viewId} not found in DOM.`);
     }
-
 
     if (navLinks) {
         navLinks.forEach(link => {
@@ -251,15 +245,13 @@ function setupNavigation() {
         console.error("Navigation elements not found for setupNavigation. Ensure initializeElements() has run and IDs/selectors are correct in HTML.");
         return;
     }
-    console.log("Setting up navigation listeners for", navLinks.length, "nav links.");
 
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const href = e.target.getAttribute('href');
-            console.log("Nav link clicked:", href);
             if (!href || href === '#') {
-                console.warn("Empty or '#' href clicked.");
+                console.warn("Empty or '#' href clicked in main navigation.");
                 return; 
             }
             const targetViewId = href.substring(1) + "View";
@@ -287,7 +279,6 @@ function setupNavigation() {
     if (siteTitleLink) {
         siteTitleLink.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log("Site title link clicked.");
             currentServiceSelection = "all"; 
             currentYardSizeSelection = "any";
             currentProviderId = null;
@@ -298,7 +289,6 @@ function setupNavigation() {
 }
 
 window.addEventListener('popstate', (event) => {
-    console.log("Popstate event:", event.state);
     const targetView = (event.state && event.state.view) ? event.state.view : 'homeView';
     const data = event.state || {};
     currentZipCode = data.zip || "Dallas, TX";
@@ -648,17 +638,11 @@ if (showBookingConfirmationBtnExplore) {
     });
 }
 
-// Ensure providerLoginForm is only selected once it's confirmed to be in the DOM for that view.
-// The event listener attachment is moved inside DOMContentLoaded to ensure the element exists.
-// const providerLoginForm = document.getElementById('providerLoginForm'); // Removed from here
-
-document.getElementById('currentYear').textContent = new Date().getFullYear();
-
 document.addEventListener('DOMContentLoaded', () => {
     initializeElements(); 
     setupNavigation(); 
 
-    // Event listener for provider login form, now that elements are initialized
+    // Moved providerLoginForm event listener here to ensure providerLoginForm is initialized
     if (providerLoginForm) { 
         providerLoginForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -666,6 +650,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const currentYearEl = document.getElementById('currentYear');
+    if(currentYearEl) currentYearEl.textContent = new Date().getFullYear();
 
     const hash = window.location.hash.substring(1); 
     let initialViewId = 'homeView';
