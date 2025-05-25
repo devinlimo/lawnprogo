@@ -23,11 +23,11 @@ const serviceData = {
 
 let mockProviders = [
     {
-        id: 6, 
+        id: 6,
         name: "Gecko Green Lawn Care",
-        rating: 4.8, 
-        reviewsCount: 4448, 
-        imageUrl: "https://placehold.co/400x300/2E8B57/FFFFFF?text=Gecko+Green+Lawn", 
+        rating: 4.8,
+        reviewsCount: 4448,
+        imageUrl: "https://placehold.co/400x300/2E8B57/FFFFFF?text=Gecko+Green+Lawn",
         galleryImages: [
             "https://placehold.co/600x400/2E8B57/FFFFFF?text=Gecko+Green%3A+Yard+1",
             "https://placehold.co/600x400/3CB371/FFFFFF?text=Gecko+Green%3A+Service",
@@ -38,13 +38,13 @@ let mockProviders = [
             { author: "Maria L.", rating: 4, comment: "Good reliable service. My lawn is definitely greener. A bit on the pricey side but they are thorough." },
             { author: "David P.", rating: 5, comment: "Used them for fertilization and weed control. Significant improvement in just a few weeks. Highly recommend their expertise." }
         ],
-        servicesOffered: ["mowing", "fertilization", "weeding", "mowingPlus"], 
-        basePriceModifier: 1.1, 
+        servicesOffered: ["mowing", "fertilization", "weeding", "mowingPlus"],
+        basePriceModifier: 1.1,
         bio: "Locally-owned & service-first! Premier professional lawn care in North Texas. With over 20 years of experience, we make lawn care easy from a team you can trust. We tailor services to your lawn's needs and the unique climate of North Texas!",
         availability: "Call for schedule",
-        address: "Serves Dallas, TX", 
-        phone: "(972) 899-9249", 
-        website: "geckogreen.com" 
+        address: "Serves Dallas, TX",
+        phone: "(972) 899-9249",
+        website: "geckogreen.com"
     },
     {
         id: 1,
@@ -62,7 +62,7 @@ let mockProviders = [
             { author: "Mike R.", rating: 4, comment: "Good service, reliable. A bit pricey but the quality is there." }
         ],
         servicesOffered: ["mowing", "fertilization", "weeding", "mowingPlus"],
-        basePriceModifier: 1.0, 
+        basePriceModifier: 1.0,
         bio: "Your local experts for a lush, healthy lawn. Serving Dallas for 10+ years with dedication and eco-friendly options.",
         availability: "Next available: Tomorrow"
     },
@@ -80,7 +80,7 @@ let mockProviders = [
             { author: "Linda B.", rating: 5, comment: "Very precise work, they live up to their name. My edges are perfect." }
         ],
         servicesOffered: ["mowing", "mowingPlus"],
-        basePriceModifier: 1.1, 
+        basePriceModifier: 1.1,
         bio: "Meticulous mowing and edging. We treat every lawn like our own, ensuring picture-perfect results every time.",
         availability: "Available from: Next Monday"
     },
@@ -96,96 +96,179 @@ let mockProviders = [
             { author: "Emily S.", rating: 4, comment: "Reliable and affordable, exactly what I needed." }
         ],
         servicesOffered: ["mowing"],
-        basePriceModifier: 0.9, 
+        basePriceModifier: 0.9,
         bio: "Affordable and reliable lawn mowing services for the Dallas area. Quality work that doesn't break the bank.",
         availability: "Next available: In 2 days"
     }
 ];
 
-// --- View Management ---
+// --- View Management Elements ---
 const views = document.querySelectorAll('.view');
 const navLinks = document.querySelectorAll('.nav-link');
 const siteTitleLink = document.querySelector('.site-title');
-let currentZipCode = "Dallas, TX"; 
-let currentServiceSelection = "all"; 
+
+// --- State Variables ---
+let currentZipCode = "Dallas, TX";
+let currentServiceSelection = "all";
 let currentYardSizeSelection = "any";
 let currentSortBy = "rating";
-let currentProviderId = null; 
+let currentProviderId = null;
+
+// --- Homepage Elements ---
+const zipCodeForm = document.getElementById('zipCodeForm');
+const zipCodeInput = document.getElementById('zipCodeInput');
+const zipError = document.getElementById('zipError');
+const categoryLinks = document.querySelectorAll('.category-link');
+
+// --- Explore Services View Elements ---
+const exploreServicesZipDisplay = document.getElementById('exploreServicesZipDisplay');
+const filterServiceTypeSelect = document.getElementById('filterServiceType');
+const filterYardSizeSelect = document.getElementById('filterYardSize');
+const filterSortBySelect = document.getElementById('filterSortBy');
+const providerListingsContainer = document.getElementById('providerListingsContainer');
+const noProvidersMessage = document.getElementById('noProvidersMessage');
+
+// --- Provider Profile View Elements ---
+const providerProfileContentContainer = document.getElementById('providerProfileContentContainer');
+const backToProvidersButton = document.getElementById('backToProvidersButton');
+
+// --- Booking Demo Elements ---
+const bookingDemoExploreSection = document.getElementById('bookingDemoExplore');
+const bookedServiceDisplayExplore = document.getElementById('bookedServiceDisplayExplore');
+const bookedYardSizeDisplayExplore = document.getElementById('bookedYardSizeDisplayExplore');
+const bookedPriceDisplayExplore = document.getElementById('bookedPriceDisplayExplore');
+const showBookingConfirmationBtnExplore = document.getElementById('showBookingConfirmationBtnExplore');
+const bookingConfirmationExploreDiv = document.getElementById('bookingConfirmationExplore');
+const confirmProviderNameEl = document.getElementById('confirmProviderName');
+const bookingProviderNameEl = document.getElementById('bookingProviderName');
+const backToProfileButton = document.getElementById('backToProfileButton');
+
+// --- Provider Page Elements ---
+const providerLoginForm = document.getElementById('providerLoginForm');
+
+function setMetaDescription(description) {
+    let metaDescTag = document.querySelector('meta[name="description"]');
+    if (!metaDescTag) {
+        metaDescTag = document.createElement('meta');
+        metaDescTag.name = "description";
+        // Prepend to head to ensure it's within head, not just appended to it
+        // Or ensure your index.html already has <meta name="description" content="">
+        const head = document.head || document.getElementsByTagName('head')[0];
+        head.appendChild(metaDescTag); // Appending is fine, but ensure it's in <head>
+    }
+    metaDescTag.content = description;
+}
 
 function setActiveView(viewId, data = {}) {
     views.forEach(view => {
         view.classList.toggle('active', view.id === viewId);
     });
-    
+
     navLinks.forEach(link => {
         link.classList.toggle('active-nav', link.getAttribute('href') === `#${viewId.replace('View','')}`);
     });
 
-    if (viewId === 'exploreServicesView') {
-        const exploreZipDisplay = document.getElementById('exploreServicesZipDisplay');
-        if (data.zip && exploreZipDisplay) {
-            currentZipCode = data.zip;
-            exploreZipDisplay.textContent = `Zip Code ${currentZipCode}`;
-        } else if (exploreZipDisplay) {
-            exploreZipDisplay.textContent = `Zip Code ${currentZipCode}`; 
-        }
-        
-        const filterServiceType = document.getElementById('filterServiceType');
-        if (data.service && filterServiceType) {
-            currentServiceSelection = data.service;
-            filterServiceType.value = currentServiceSelection;
-        } else if (filterServiceType) {
-            filterServiceType.value = currentServiceSelection; 
-        }
-        
-        const filterYardSize = document.getElementById('filterYardSize');
-        if(filterYardSize) filterYardSize.value = currentYardSizeSelection;
+    // SEO: Update title and meta description based on view
+    let pageTitle = "LocalProGo - Your Home Service Connection"; // Default title
+    let metaDescription = "Find top-rated local home service professionals easily with LocalProGo. Transparent pricing, browse with ease."; // Default description
 
-        const filterSortBy = document.getElementById('filterSortBy');
-        if(filterSortBy) filterSortBy.value = currentSortBy;
-        
-        renderProviders(); 
+    if (viewId === 'homeView') {
+        pageTitle = "LocalProGo - Find Trusted Local Home Service Pros";
+        metaDescription = "Easily find and book top-rated local lawn care, landscaping, and other home service professionals in your area with LocalProGo. Transparent pricing, browse anonymously.";
+    } else if (viewId === 'exploreServicesView') {
+        const zipContext = data.zip || currentZipCode || 'your area';
+        pageTitle = `Explore Services in ${zipContext} | LocalProGo`;
+        metaDescription = `Browse and compare local lawn care and home service providers in Zip Code ${zipContext} on LocalProGo.`;
+        if (exploreServicesZipDisplay) { // Ensure element exists before trying to set textContent
+            if (data.zip) currentZipCode = data.zip;
+            exploreServicesZipDisplay.textContent = `Zip Code ${currentZipCode}`;
+        }
+        if (data.service && filterServiceTypeSelect) {
+            currentServiceSelection = data.service;
+            filterServiceTypeSelect.value = currentServiceSelection;
+        } else if (filterServiceTypeSelect) {
+            filterServiceTypeSelect.value = currentServiceSelection;
+        }
+        if(filterYardSizeSelect) filterYardSizeSelect.value = currentYardSizeSelection;
+        if(filterSortBySelect) filterSortBySelect.value = currentSortBy;
+        renderProviders();
     } else if (viewId === 'providerProfileView' && data.providerId) {
-        currentProviderId = data.providerId;
+        currentProviderId = data.providerId; // Ensure currentProviderId is updated
+        const provider = mockProviders.find(p => p.id === data.providerId);
+        if (provider) {
+            pageTitle = `${provider.name} - Services & Reviews | LocalProGo`;
+            metaDescription = `View profile, services, reviews for ${provider.name} on LocalProGo. Serving ${currentZipCode || 'your area'}.`;
+        }
         renderProviderProfile(currentProviderId);
+    } else if (viewId === 'providersView') {
+        pageTitle = "For Service Providers | Join LocalProGo";
+        metaDescription = "Partner with LocalProGo to grow your home service business. Reach more customers in your area.";
+    } else if (viewId === 'bookingDemoExplore' && data.providerId) {
+        const provider = mockProviders.find(p => p.id === data.providerId);
+        const service = serviceData[data.service]; // Assuming data.service is the serviceKey
+        if (provider && service) {
+            pageTitle = `Book ${service.name} with ${provider.name} | LocalProGo`;
+            metaDescription = `Confirm your booking for ${service.name} with ${provider.name} through LocalProGo.`;
+        }
     }
+
+    document.title = pageTitle;
+    setMetaDescription(metaDescription); // Call helper function
     window.scrollTo(0, 0);
 }
 
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetViewId = e.target.getAttribute('href').substring(1) + "View";
-        const data = (targetViewId === 'providerProfileView' && currentProviderId) ? { providerId: currentProviderId } : { zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy };
-        setActiveView(targetViewId, data);
-        history.pushState({view: targetViewId, ...data}, "", e.target.getAttribute('href'));
+function setupNavigation() {
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const href = e.target.getAttribute('href');
+            const targetViewId = href.substring(1) + "View";
+            
+            let stateData = { 
+                view: targetViewId, 
+                zip: currentZipCode, 
+                service: (targetViewId === 'exploreServicesView' || targetViewId === 'providerProfileView') ? currentServiceSelection : 'all', 
+                yardSize: (targetViewId === 'exploreServicesView' || targetViewId === 'providerProfileView') ? currentYardSizeSelection : 'any', 
+                sortBy: (targetViewId === 'exploreServicesView' || targetViewId === 'providerProfileView') ? currentSortBy : 'rating'
+            };
+            // If navigating to a specific provider profile from a non-provider context (e.g. bookmark),
+            // currentProviderId might be null. The 'data.providerId' in setActiveView handles this.
+            // For general navigation, we don't assume a specific providerId unless it's already part of the context.
+            if (targetViewId === 'providerProfileView' && currentProviderId) {
+                 stateData.providerId = currentProviderId;
+            } else if (targetViewId !== 'exploreServicesView' && targetViewId !== 'providerProfileView' && targetViewId !== 'bookingDemoExplore') {
+                stateData.service = 'all'; 
+                stateData.yardSize = 'any';
+                stateData.providerId = null; // Reset providerId if navigating to a general page
+            }
+            
+            setActiveView(targetViewId, stateData);
+            history.pushState(stateData, "", href);
+        });
     });
-});
 
-if (siteTitleLink) {
-    siteTitleLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveView('homeView');
-        history.pushState({view: 'homeView'}, "", "#home");
-    });
+    if (siteTitleLink) {
+        siteTitleLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentServiceSelection = "all"; 
+            currentYardSizeSelection = "any";
+            currentProviderId = null;
+            setActiveView('homeView', {zip: currentZipCode, service: 'all', yardSize: 'any', sortBy: 'rating'});
+            history.pushState({view: 'homeView', zip: currentZipCode, service: 'all', yardSize: 'any', sortBy: 'rating'}, "", "#home");
+        });
+    }
 }
 
 window.addEventListener('popstate', (event) => {
     const targetView = (event.state && event.state.view) ? event.state.view : 'homeView';
     const data = event.state || {};
-    if(data.zip) currentZipCode = data.zip;
-    if(data.service) currentServiceSelection = data.service;
-    if(data.yardSize) currentYardSizeSelection = data.yardSize;
-    if(data.sortBy) currentSortBy = data.sortBy;
-    if(data.providerId) currentProviderId = data.providerId; 
+    currentZipCode = data.zip || "Dallas, TX";
+    currentServiceSelection = data.service || "all";
+    currentYardSizeSelection = data.yardSize || "any";
+    currentSortBy = data.sortBy || "rating";
+    currentProviderId = data.providerId || null; 
     setActiveView(targetView, data);
 });
-
-// --- Homepage Specific JS ---
-const zipCodeForm = document.getElementById('zipCodeForm');
-const zipCodeInput = document.getElementById('zipCodeInput');
-const zipError = document.getElementById('zipError');
-const categoryLinks = document.querySelectorAll('.category-link');
 
 if (zipCodeForm) {
     zipCodeForm.addEventListener('submit', function(event) {
@@ -196,9 +279,12 @@ if (zipCodeForm) {
             currentZipCode = zip;
             const preselectedService = this.dataset.preselectedService || "all";
             delete this.dataset.preselectedService;
+            currentServiceSelection = preselectedService; 
+            currentYardSizeSelection = 'any'; 
+            currentSortBy = 'rating'; 
 
-            setActiveView('exploreServicesView', { zip: currentZipCode, service: preselectedService });
-            history.pushState({view: 'exploreServicesView', zip: currentZipCode, service: preselectedService, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", "#exploreServices");
+            setActiveView('exploreServicesView', { zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy });
+            history.pushState({view: 'exploreServicesView', zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", "#exploreServices");
         } else {
             zipError.textContent = 'Please enter a valid 5-digit Zip Code.';
         }
@@ -209,12 +295,12 @@ categoryLinks.forEach(link => {
     link.addEventListener('click', function(e) {
         e.preventDefault();
         const service = this.dataset.service;
-        currentServiceSelection = service;
+        currentServiceSelection = service; 
         const currentZipVal = zipCodeInput.value.trim();
 
         if (currentZipVal && /^\d{5}$/.test(currentZipVal)) {
             currentZipCode = currentZipVal;
-            setActiveView('exploreServicesView', { zip: currentZipCode, service: currentServiceSelection });
+            setActiveView('exploreServicesView', { zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy });
             history.pushState({view: 'exploreServicesView', zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", "#exploreServices");
         } else { 
             zipCodeInput.focus();
@@ -223,22 +309,6 @@ categoryLinks.forEach(link => {
         }
     });
 });
-
-// --- Explore Services View Specific JS ---
-const filterServiceTypeSelect = document.getElementById('filterServiceType');
-const filterYardSizeSelect = document.getElementById('filterYardSize');
-const filterSortBySelect = document.getElementById('filterSortBy');
-const providerListingsContainer = document.getElementById('providerListingsContainer');
-const noProvidersMessage = document.getElementById('noProvidersMessage');
-
-const bookingDemoExploreSection = document.getElementById('bookingDemoExplore');
-const bookedServiceDisplayExplore = document.getElementById('bookedServiceDisplayExplore');
-const bookedYardSizeDisplayExplore = document.getElementById('bookedYardSizeDisplayExplore');
-const bookedPriceDisplayExplore = document.getElementById('bookedPriceDisplayExplore');
-const showBookingConfirmationBtnExplore = document.getElementById('showBookingConfirmationBtnExplore');
-const bookingConfirmationExploreDiv = document.getElementById('bookingConfirmationExplore');
-const confirmProviderNameEl = document.getElementById('confirmProviderName');
-const bookingProviderNameEl = document.getElementById('bookingProviderName');
 
 function calculateProviderPriceRange(provider, serviceKey, yardSizeKey) {
     if (!serviceData[serviceKey]) return "Service N/A";
@@ -328,17 +398,11 @@ function renderProviders() {
         button.addEventListener('click', function() {
             const providerId = parseInt(this.dataset.providerId);
             currentProviderId = providerId; 
-            setActiveView('providerProfileView', { providerId: providerId });
+            setActiveView('providerProfileView', { providerId: providerId }); 
             history.pushState({view: 'providerProfileView', providerId: providerId, zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", `#providerProfile?id=${providerId}`);
         });
     });
 }
-
-// --- Provider Profile View JS ---
-const providerProfileContentContainer = document.getElementById('providerProfileContentContainer');
-const backToProvidersButton = document.getElementById('backToProvidersButton');
-const backToProfileButton = document.getElementById('backToProfileButton');
-
 
 if (backToProvidersButton) {
     backToProvidersButton.addEventListener('click', () => {
@@ -349,7 +413,7 @@ if (backToProvidersButton) {
 if (backToProfileButton) {
     backToProfileButton.addEventListener('click', () => {
         if (currentProviderId) { 
-             setActiveView('providerProfileView', { providerId: currentProviderId });
+             setActiveView('providerProfileView', { providerId: currentProviderId }); 
              history.pushState({view: 'providerProfileView', providerId: currentProviderId, zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy}, "", `#providerProfile?id=${currentProviderId}`);
         } else {
             setActiveView('exploreServicesView', {zip: currentZipCode, service: currentServiceSelection, yardSize: currentYardSizeSelection, sortBy: currentSortBy});
@@ -400,7 +464,7 @@ function renderProviderProfile(providerId) {
         return `<option value="${serviceKey}">${serviceDetail ? serviceDetail.name : serviceKey}</option>`;
     }).join('');
     
-    const initialProfileServiceKey = provider.servicesOffered.includes(currentServiceSelection) && currentServiceSelection !== 'all' ? currentServiceSelection : provider.servicesOffered[0];
+    const initialProfileServiceKey = (provider.servicesOffered.includes(currentServiceSelection) && currentServiceSelection !== 'all') ? currentServiceSelection : provider.servicesOffered[0];
     const initialProfileYardSizeKey = currentYardSizeSelection !== 'any' ? currentYardSizeSelection : 'medium';
     
     providerProfileContentContainer.innerHTML = `
@@ -468,11 +532,11 @@ function renderProviderProfile(providerId) {
     if(profileYardSizeSelect) profileYardSizeSelect.addEventListener('change', () => updateProfilePriceDetails(provider));
 
     document.getElementById('bookThisProviderBtn').addEventListener('click', function() {
-        const selectedServiceKey = document.getElementById('profileServiceType').value;
-        const selectedYardSizeKey = document.getElementById('profileYardSize').value;
-        const priceString = document.getElementById('profilePriceRange').textContent;
+        const selectedServiceKeyOnProfile = document.getElementById('profileServiceType').value;
+        const selectedYardSizeKeyOnProfile = document.getElementById('profileYardSize').value;
+        const priceStringOnProfile = document.getElementById('profilePriceRange').textContent;
         
-        handleProceedToBookFromProfile(provider, selectedServiceKey, selectedYardSizeKey, priceString);
+        handleProceedToBookFromProfile(provider, selectedServiceKeyOnProfile, selectedYardSizeKeyOnProfile, priceStringOnProfile);
     });
 }
 
@@ -492,7 +556,7 @@ function updateProfilePriceDetails(provider) {
         descriptionEl.textContent = service.description;
         priceEl.textContent = calculateProviderPriceRange(provider, selectedServiceKey, selectedYardSizeKey);
         const bookBtn = document.getElementById('bookThisProviderBtn');
-        if(bookBtn) {
+        if(bookBtn) { 
             bookBtn.dataset.serviceKey = selectedServiceKey;
             bookBtn.dataset.yardSizeKey = selectedYardSizeKey;
             bookBtn.dataset.priceString = priceEl.textContent;
@@ -505,18 +569,28 @@ function updateProfilePriceDetails(provider) {
 
 function handleProceedToBookFromProfile(provider, serviceKey, yardSizeKey, priceString) {
     const service = serviceData[serviceKey];
-    const yardSizeSelectEl = document.getElementById('profileYardSize');
+    const yardSizeSelectEl = document.getElementById('profileYardSize'); // Use the select from the profile page
     const yardSizeText = Array.from(yardSizeSelectEl.options).find(opt => opt.value === yardSizeKey)?.text || yardSizeKey;
 
     if (provider && service && bookingDemoExploreSection) {
         if(confirmProviderNameEl) confirmProviderNameEl.textContent = provider.name;
         if(bookingProviderNameEl) bookingProviderNameEl.textContent = provider.name;
         if(bookedServiceDisplayExplore) bookedServiceDisplayExplore.textContent = service.name;
-        if(bookedYardSizeDisplayExplore) bookedYardSizeDisplayExplore.textContent = yardSizeText;
+        if(bookedYardSizeDisplayExplore) bookedYardSizeDisplayExplore.textContent = yardSizeText; 
         if(bookedPriceDisplayExplore) bookedPriceDisplayExplore.textContent = priceString;
         
-        setActiveView('bookingDemoExplore', { providerId: provider.id, service: serviceKey, yardSize: yardSizeKey, price: priceString });
-        history.pushState({view: 'bookingDemoExplore', providerId: provider.id, service: serviceKey, yardSize: yardSizeKey, price: priceString, zip: currentZipCode, sortBy: currentSortBy}, "", `#booking?provider=${provider.id}&service=${serviceKey}`);
+        const bookingData = { 
+            providerId: provider.id, 
+            service: serviceKey, 
+            yardSize: yardSizeKey, 
+            price: priceString, 
+            zip: currentZipCode, 
+            previousServiceSelection: currentServiceSelection, // Save explore page filter state
+            previousYardSizeSelection: currentYardSizeSelection,
+            previousSortBy: currentSortBy
+        };
+        setActiveView('bookingDemoExplore', bookingData);
+        history.pushState({view: 'bookingDemoExplore', ...bookingData}, "", `#booking?provider=${provider.id}&service=${serviceKey}&yard=${yardSizeKey}`);
     }
 }
 
@@ -541,6 +615,8 @@ if (providerLoginForm) {
 document.getElementById('currentYear').textContent = new Date().getFullYear();
 
 document.addEventListener('DOMContentLoaded', () => {
+    setupNavigation(); 
+
     const hash = window.location.hash.substring(1); 
     let initialViewId = 'homeView';
     let initialData = {};
@@ -556,13 +632,21 @@ document.addEventListener('DOMContentLoaded', () => {
             currentYardSizeSelection = history.state.yardSize || "any";
             currentSortBy = history.state.sortBy || "rating";
         }
+         initialData.zip = currentZipCode; // Pass these for context if needed by renderProviderProfile
+         initialData.service = currentServiceSelection;
+         initialData.yardSize = currentYardSizeSelection;
+         initialData.sortBy = currentSortBy;
+
     } else if (hash === 'exploreServices') {
         initialViewId = 'exploreServicesView';
         if (history.state) { 
-            initialData.zip = history.state.zip;
-            initialData.service = history.state.service;
+            initialData.zip = history.state.zip || currentZipCode;
+            initialData.service = history.state.service || currentServiceSelection;
             currentYardSizeSelection = history.state.yardSize || "any";
             currentSortBy = history.state.sortBy || "rating";
+        } else { // Default if no state (e.g. direct navigation)
+            initialData.zip = currentZipCode;
+            initialData.service = currentServiceSelection;
         }
     } else if (hash === 'providers') {
         initialViewId = 'providersView';
@@ -570,19 +654,31 @@ document.addEventListener('DOMContentLoaded', () => {
         initialViewId = 'bookingDemoExplore';
         initialData.providerId = parseInt(params.get('provider'));
         initialData.service = params.get('service');
+        initialData.yardSize = params.get('yard') || (history.state && history.state.yardSize) || 'medium'; 
         currentProviderId = initialData.providerId;
         
         const provider = mockProviders.find(p => p.id === initialData.providerId);
         const service = serviceData[initialData.service];
+
         if(provider && service && confirmProviderNameEl && bookingProviderNameEl && bookedServiceDisplayExplore && bookedPriceDisplayExplore) {
             confirmProviderNameEl.textContent = provider.name;
             bookingProviderNameEl.textContent = provider.name;
             bookedServiceDisplayExplore.textContent = service.name;
-            const yardSizeForBooking = (history.state && history.state.yardSize) ? history.state.yardSize : 'medium'; 
+            
+            const yardSizeForBooking = initialData.yardSize;
             const priceForBooking = (history.state && history.state.price) ? history.state.price : calculateProviderPriceRange(provider, initialData.service, yardSizeForBooking);
             bookedPriceDisplayExplore.textContent = priceForBooking;
-            const yardSizeSelectEl = document.getElementById('filterYardSize'); 
-            if(bookedYardSizeDisplayExplore && yardSizeSelectEl) bookedYardSizeDisplayExplore.textContent = Array.from(yardSizeSelectEl.options).find(opt => opt.value === yardSizeForBooking)?.text || yardSizeForBooking;
+            
+            let yardSizeTextValue = yardSizeForBooking;
+            const yardSizeSelectOnProfile = document.getElementById('profileYardSize');
+            const yardSizeSelectOnFilter = document.getElementById('filterYardSize'); 
+            const yardSizeSelectEl = yardSizeSelectOnProfile || yardSizeSelectOnFilter;
+
+            if(bookedYardSizeDisplayExplore && yardSizeSelectEl) {
+                const foundOption = Array.from(yardSizeSelectEl.options).find(opt => opt.value === yardSizeForBooking);
+                yardSizeTextValue = foundOption ? foundOption.text : yardSizeForBooking;
+            }
+             if(bookedYardSizeDisplayExplore) bookedYardSizeDisplayExplore.textContent = yardSizeTextValue;
         }
     } else { 
          history.replaceState({view: 'homeView'}, "", "#home");
