@@ -118,6 +118,7 @@ let currentSortBy = "rating";
 let currentProviderId = null;
 
 function initializeElements() {
+    console.log("Initializing DOM elements...");
     views = document.querySelectorAll('.view');
     navLinks = document.querySelectorAll('.nav-link');
     siteTitleLink = document.querySelector('.site-title');
@@ -148,6 +149,7 @@ function initializeElements() {
     backToProfileButton = document.getElementById('backToProfileButton');
     
     providerLoginForm = document.getElementById('providerLoginForm');
+    console.log("DOM elements initialized. Views found:", views.length, "Nav links found:", navLinks.length);
 }
 
 function setMetaDescription(description) {
@@ -156,20 +158,38 @@ function setMetaDescription(description) {
         metaDescTag = document.createElement('meta');
         metaDescTag.name = "description";
         const head = document.head || document.getElementsByTagName('head')[0];
-        if (head) head.appendChild(metaDescTag); // Make sure head exists
+        if (head) head.appendChild(metaDescTag);
     }
     if (metaDescTag) metaDescTag.content = description;
 }
 
 function setActiveView(viewId, data = {}) {
+    console.log(`Attempting to set active view to: ${viewId} with data:`, data);
     if (!views || views.length === 0) {
-        console.error("Views not initialized. Call initializeElements() first.");
-        return;
+        console.error("setActiveView called before elements initialized. Attempting to initialize now.");
+        initializeElements(); // Ensure elements are initialized if not already
+        if (!views || views.length === 0) {
+             console.error("Elements still not initialized after re-attempt. Cannot set view.");
+             return;
+        }
     }
 
+    let viewFound = false;
     views.forEach(view => {
-        if (view) view.classList.toggle('active', view.id === viewId);
+        if (view) {
+            if (view.id === viewId) {
+                view.classList.add('active');
+                viewFound = true;
+                console.log(`View ${viewId} activated.`);
+            } else {
+                view.classList.remove('active');
+            }
+        }
     });
+    if (!viewFound) {
+        console.error(`View with ID ${viewId} not found in DOM.`);
+    }
+
 
     if (navLinks) {
         navLinks.forEach(link => {
@@ -227,15 +247,20 @@ function setActiveView(viewId, data = {}) {
 
 function setupNavigation() {
     if (!navLinks || !siteTitleLink) {
-        console.error("Navigation elements not found. Ensure initializeElements() has run and IDs are correct.");
+        console.error("Navigation elements not found for setupNavigation. Ensure initializeElements() has run and IDs/selectors are correct in HTML.");
         return;
     }
+    console.log("Setting up navigation listeners for", navLinks.length, "nav links.");
 
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const href = e.target.getAttribute('href');
-            if (!href || href === '#') return; // Basic check
+            console.log("Nav link clicked:", href);
+            if (!href || href === '#') {
+                console.warn("Empty or '#' href clicked.");
+                return; 
+            }
             const targetViewId = href.substring(1) + "View";
             
             let stateData = { 
@@ -261,6 +286,7 @@ function setupNavigation() {
     if (siteTitleLink) {
         siteTitleLink.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log("Site title link clicked.");
             currentServiceSelection = "all"; 
             currentYardSizeSelection = "any";
             currentProviderId = null;
@@ -271,6 +297,7 @@ function setupNavigation() {
 }
 
 window.addEventListener('popstate', (event) => {
+    console.log("Popstate event:", event.state);
     const targetView = (event.state && event.state.view) ? event.state.view : 'homeView';
     const data = event.state || {};
     currentZipCode = data.zip || "Dallas, TX";
@@ -341,7 +368,10 @@ function calculateProviderPriceRange(provider, serviceKey, yardSizeKey) {
 }
 
 function renderProviders() {
-    if (!providerListingsContainer) return;
+    if (!providerListingsContainer) {
+        console.error("providerListingsContainer not found in renderProviders");
+        return;
+    }
     providerListingsContainer.innerHTML = ''; 
 
     let filteredProviders = mockProviders.filter(provider => {
@@ -357,11 +387,10 @@ function renderProviders() {
         filteredProviders.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    if (filteredProviders.length === 0) {
-        if(noProvidersMessage) noProvidersMessage.classList.remove('hidden');
-    } else {
-         if(noProvidersMessage) noProvidersMessage.classList.add('hidden');
+    if (noProvidersMessage) {
+        noProvidersMessage.classList.toggle('hidden', filteredProviders.length > 0);
     }
+
 
     filteredProviders.forEach(provider => {
         const listItem = document.createElement('div');
