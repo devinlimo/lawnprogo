@@ -108,7 +108,7 @@ let zipCodeForm, zipCodeInput, zipError, categoryLinks;
 let exploreServicesZipDisplay, filterServiceTypeSelect, filterYardSizeSelect, filterSortBySelect, providerListingsContainer, noProvidersMessage;
 let providerProfileContentContainer, backToProvidersButton;
 let bookingDemoExploreSection, bookedServiceDisplayExplore, bookedYardSizeDisplayExplore, bookedPriceDisplayExplore, showBookingConfirmationBtnExplore, bookingConfirmationExploreDiv, confirmProviderNameEl, bookingProviderNameEl, backToProfileButton;
-let providerLoginForm;
+let providerLoginForm; // Declared once here
 
 // --- State Variables ---
 let currentZipCode = "Dallas, TX";
@@ -148,7 +148,8 @@ function initializeElements() {
     bookingProviderNameEl = document.getElementById('bookingProviderName');
     backToProfileButton = document.getElementById('backToProfileButton');
     
-    providerLoginForm = document.getElementById('providerLoginForm');
+    // Assign to the globally declared variable, do not re-declare with let or const
+    providerLoginForm = document.getElementById('providerLoginForm'); 
     console.log("DOM elements initialized. Views found:", views.length, "Nav links found:", navLinks.length);
 }
 
@@ -167,7 +168,7 @@ function setActiveView(viewId, data = {}) {
     console.log(`Attempting to set active view to: ${viewId} with data:`, data);
     if (!views || views.length === 0) {
         console.error("setActiveView called before elements initialized. Attempting to initialize now.");
-        initializeElements(); // Ensure elements are initialized if not already
+        initializeElements(); 
         if (!views || views.length === 0) {
              console.error("Elements still not initialized after re-attempt. Cannot set view.");
              return;
@@ -647,19 +648,24 @@ if (showBookingConfirmationBtnExplore) {
     });
 }
 
-const providerLoginForm = document.getElementById('providerLoginForm');
-if (providerLoginForm) {
-    providerLoginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        alert('Provider login attempt (demo). In a real app, this would authenticate.');
-    });
-}
+// Ensure providerLoginForm is only selected once it's confirmed to be in the DOM for that view.
+// The event listener attachment is moved inside DOMContentLoaded to ensure the element exists.
+// const providerLoginForm = document.getElementById('providerLoginForm'); // Removed from here
 
 document.getElementById('currentYear').textContent = new Date().getFullYear();
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeElements(); 
     setupNavigation(); 
+
+    // Event listener for provider login form, now that elements are initialized
+    if (providerLoginForm) { 
+        providerLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Provider login attempt (demo). In a real app, this would authenticate.');
+        });
+    }
+
 
     const hash = window.location.hash.substring(1); 
     let initialViewId = 'homeView';
